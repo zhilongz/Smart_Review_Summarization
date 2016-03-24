@@ -1,0 +1,1 @@
+[["camera", 22], ["pictur", 13], ["screen", 7], ["featur", 6], ["size", 5], ["shot", 4], ["zoom", 4], ["photo", 3], ["button", 3], ["coolpix s6400", 3], ["friday", 3], ["angl", 3], ["point", 3], ["color", 3], ["batteri", 3]]

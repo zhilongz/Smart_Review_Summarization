@@ -1,0 +1,1 @@
+[["camera", 15], ["pictures", 12], ["cameras", 7], ["screen", 7], ["size", 5], ["zoom", 4], ["feature", 3], ["color", 3], ["party", 3], ["shots", 3], ["price", 3], ["friday", 3], ["features", 3], ["point", 3], ["charger", 3]]

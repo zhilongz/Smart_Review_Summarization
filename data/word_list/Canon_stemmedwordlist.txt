@@ -1,0 +1,1 @@
+[["camera", 60], ["flash", 21], ["pictur", 15], ["imag", 15], ["qualiti", 12], ["review", 12], ["photo", 12], ["time", 12], ["canon g3", 11], ["battery lif", 9], ["set", 9], ["zoom", 9], ["card", 7], ["thing", 7], ["picture qu", 7]]
