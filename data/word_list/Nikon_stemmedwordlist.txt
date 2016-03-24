@@ -1,0 +1,1 @@
+[["camera", 38], ["pictur", 14], ["batteri", 13], ["card", 9], ["zoom", 8], ["qualiti", 8], ["nikon coolpix", 8], ["shot", 7], ["pic", 7], ["battery lif", 6], ["mode", 6], ["set", 6], ["picture qu", 6], ["scene", 5], ["size", 5]]

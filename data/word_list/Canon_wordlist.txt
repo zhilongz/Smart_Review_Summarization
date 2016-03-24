@@ -1,0 +1,1 @@
+[["camera", 43], ["cameras", 17], ["flash", 16], ["pictures", 13], ["quality", 12], ["canon g3", 11], ["photos", 11], ["time", 11], ["battery life", 9], ["reviews", 8], ["zoom", 8], ["images", 8], ["image", 7], ["card", 7], ["picture quality", 7]]
