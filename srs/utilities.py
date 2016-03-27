@@ -14,10 +14,10 @@ def tokenize(string):
 
 class Sentence(object):
 
-    def __init__(self, content, tokens=[], aspects='', sentiment=None):
+    def __init__(self, content, tokens=[], labeled_aspects='', sentiment=None):
         self.content = content
         self.tokens = tokens
-        self.aspects = aspects
+        self.labeled_aspects = labeled_aspects
         self.sentiment = sentiment
         self.pos_tagged_tokens = []
         self.dynamic_aspects = []
@@ -103,7 +103,7 @@ class Product(object):
             for raw_sentence in raw_review[1:]:
                 aspects = [raw_sentence.split('##')[0]] ## need regexp to further refine the aspect
                 content = raw_sentence.split('##')[1]
-                sentence = Sentence(content=content, aspects=aspects)
+                sentence = Sentence(content=content, labeled_aspects=aspects)
                 sentences.append(sentence)
             review = Review(title=title, sentences=sentences)
             reviews.append(review)
