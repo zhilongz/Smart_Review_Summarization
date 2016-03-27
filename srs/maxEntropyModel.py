@@ -95,7 +95,7 @@ def loss_func(lam_vec,static_aspect_list,ls_list):
 
 def train(static_aspect_list,ls_list,lambda_len):
     """ optimization by minimizing the loss function returns lambda* """
-    lambda_guess = np.random.rand(lambda_len)*0.01
+    lambda_guess = np.random.rand(lambda_len)*0.1
     res = minimize(loss_func, lambda_guess, args=(static_aspect_list,ls_list), method='BFGS', options={'gtol': 1e-3, 'disp': True})
     return res
     """
