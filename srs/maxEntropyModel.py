@@ -26,18 +26,24 @@ def f_vec(static_aspect, ls):
     returns a vector of length len(dynamic_aspect_list)
     """
     dynamic_aspect_list = loadDynamicAspectList()   
-    
-    #process sentence to a list of word without punctuation and number
-    word_list = word_tokenize(ls.content)
-    punctuation = re.compile(r'[-.?!,":;()|0-9]') # remove these punctuations and number 
-    word_list = [punctuation.sub("", word) for word in word_list]  
-    word_list = filter(None, word_list) #filters empty 
-    # stem process for word_list
-    stemmer = SnowballStemmer('english')
-    for i in range(len(word_list)):
-        word = word_list[i]
-        stemmedWord = stemmer.stem(word)
-        word_list[i] = stemmedWord
+
+    word_list = []
+    if ls.tokens != []:
+        word_list = ls.tokens
+    else:
+        #process sentence to a list of word without punctuation and number
+        word_list = word_tokenize(ls.content)
+        punctuation = re.compile(r'[-.?!,":;()|0-9]') # remove these punctuations and number 
+        word_list = [punctuation.sub("", word) for word in word_list]  
+        word_list = filter(None, word_list) #filters empty 
+        # stem process for word_list
+        stemmer = SnowballStemmer('english')
+        for i in range(len(word_list)):
+            word = word_list[i]
+            stemmedWord = stemmer.stem(word)
+            word_list[i] = stemmedWord
+
+        ls.tokens = word_list
 
     len_word = max(len(word_list),1)*1.0;
     f_value = []
