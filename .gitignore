@@ -12,3 +12,6 @@
 
 # Data files
 data/*
+
+# Ipython notebook checkpoint files
+*/.ipynb_checkpoints/*
