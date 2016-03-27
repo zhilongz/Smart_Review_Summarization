@@ -14,15 +14,8 @@ from utilities import Sentence
 
 
 def loadDynamicAspectList():
-    stemmer = SnowballStemmer('english')
     #load a list of features words extracted and acts as the dynamic aspect. The length of this list will determine the size of the model
-    dynamic_aspect_list = ['zoom','pictures','lens','quality','battery','price','digital','time','cameras','picture','image','shots','shoot','megapixel']
-
-    # stem process for dynamic_aspect_list
-    for i in range(len(dynamic_aspect_list)):
-        word = dynamic_aspect_list[i]
-        stemmedWord = stemmer.stem(word)
-        dynamic_aspect_list[i] = stemmedWord
+    dynamic_aspect_list = [u'zoom', u'pictur', u'len', u'qualiti', u'batteri', u'price', u'digit', u'time', u'camera', u'pictur', u'imag', u'shot', u'shoot', u'megapixel']
 
     return dynamic_aspect_list
 
@@ -86,11 +79,7 @@ def loss_func(lam_vec,static_aspect_list,ls_list):
         deno = 0
         for c in static_aspect_list:
             f = f_vec(c,ls) # a vector 
-            try:
-                deno = deno + np.exp(np.inner(lam_vec,f))
-            except RuntimeWarning:
-                print f
-                print lam_vec
+            deno = deno + np.exp(np.inner(lam_vec,f))
         
         loss_sent = np.inner(lam_vec,f_cor) - np.log(deno)
         loss = loss + loss_sent
