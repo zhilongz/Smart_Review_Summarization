@@ -21,6 +21,7 @@ class Sentence(object):
         self.sentiment = sentiment
         self.pos_tagged_tokens = []
         self.dynamic_aspects = []
+        self.static_aspect = None
         
 
     def tokenize(self):
