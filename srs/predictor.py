@@ -30,7 +30,7 @@ class StaticPredictor(object):
 
 
 	def train(self):
-		self.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_dict.txt')
+		self.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_1.txt')
 		print self.wordlist_dict
 		self.loadStaticAspectList('predictor_data/static_aspect_list.txt')
 		print self.staticAspectList
