@@ -138,12 +138,12 @@ def train(wordlist_dict, static_aspect_list,ls_list,lambda_len):
     see for list of method: http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.optimize.minimize.html
     """
 
-def loadUsefulTrainingData(static_traning_data_dir):
+def loadUsefulTrainingData(static_training_data_dir):
     import os
     sentences = []
-    for data_file in os.listdir(static_traning_data_dir):
+    for data_file in os.listdir(static_training_data_dir):
         if data_file.endswith('labeled.txt'):
-            sentences.extend(load_labelled_sent(os.path.join(static_traning_data_dir, data_file)))
+            sentences.extend(load_labelled_sent(os.path.join(static_training_data_dir, data_file)))
     
     useful_sentences = []
     for sent in sentences:
@@ -152,12 +152,12 @@ def loadUsefulTrainingData(static_traning_data_dir):
 
     return useful_sentences
 
-def loadTrainingData(static_traning_data_dir):
+def loadTrainingData(static_training_data_dir):
     import os
     sentences = []
-    for data_file in os.listdir(static_traning_data_dir):
+    for data_file in os.listdir(static_training_data_dir):
         if data_file.endswith('labeled.txt'):
-            sentences.extend(load_labelled_sent(os.path.join(static_traning_data_dir, data_file)))
+            sentences.extend(load_labelled_sent(os.path.join(static_training_data_dir, data_file)))
     return sentences
 
 def load_labelled_sent(file_name): 
