@@ -1,8 +1,8 @@
-
+import os
 import json
 import sys
 import numpy as np
-from maxEntropyModel import cond_prob, loadDynamicAspectList, train, loadTrainingData
+from maxEntropyModel import cond_prob, loadWordListDict, train, loadUsefulTrainingData
 
 class StaticPredictor(object):
 	"""
@@ -14,7 +14,7 @@ class StaticPredictor(object):
 
 		self.params = [] # would be lambda_star from training results
 		self.staticAspectList = []
-		self.wordlist = []
+		self.wordlist_dict = []
 
 	def loadParams(self, param_file):
 		file = open(param_file, 'r')
@@ -26,18 +26,21 @@ class StaticPredictor(object):
 		file = open(static_aspect_list_file, 'r')
 		static_aspect_list = json.load(file)
 		file.close()
-		self.staticAspectList = static_aspect_list
+		self.staticAspectList = sorted(static_aspect_list)
 
 
 	def train(self):
-		self.wordlist = loadDynamicAspectList()
-		print self.wordlist
+		self.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_dict.txt')
+		print self.wordlist_dict
 		self.loadStaticAspectList('predictor_data/static_aspect_list.txt')
 		print self.staticAspectList
-		training_set = loadTrainingData()
+		static_traning_data_dir = os.path.abspath('static_training_data/')
+		training_set = loadUsefulTrainingData(static_traning_data_dir)
 
-		lambda_len = len(self.wordlist)*len(self.staticAspectList)
-		res = train(self.staticAspectList, training_set[:1000], lambda_len)
+		print "training sentences: {0}".format(len(training_set))
+
+		lambda_len = len(self.wordlist_dict)*len(self.staticAspectList)
+		res = train(self.wordlist_dict, self.staticAspectList, training_set[:500], lambda_len)
 
 		self.params = res.x
 		self.saveLambda()
@@ -48,15 +51,16 @@ class StaticPredictor(object):
 		json.dump(list(self.params), lambda_file)
 		lambda_file.close()
 
-	def predict(self, sentence, cp_threshold=0.7,debug=False):
+	def predict(self, sentence, cp_threshold=0.0,debug=False):
 		"""
 		INPUT: `Sentence` object: sentence
 		OUTPUT: `str` onject: predicted_aspect
 		"""
 		params = self.params
 		static_aspect_list = self.staticAspectList
+		wordlist_dict = self.wordlist_dict
 
-		cp = cond_prob(params,static_aspect_list,sentence, isTraining=False)
+		cp = cond_prob(params, wordlist_dict, static_aspect_list,sentence, isTraining=False)
 
 		predicted_aspect_index = cp.index(max(cp)) 
 		predicted_aspect = static_aspect_list[predicted_aspect_index]
@@ -76,6 +80,11 @@ class StaticPredictor(object):
 def main():
 	staticPredictor = StaticPredictor()
 	staticPredictor.train()
+	# staticPredictor.loadParams('predictor_data/lambda_opt.txt')
+	# staticPredictor.loadStaticAspectList('predictor_data/static_aspect_list.txt')
+	# for i in range(11):
+	# 	print staticPredictor.staticAspectList[i], staticPredictor.params[i*11:(i+1)*11]
+
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 
 from predictor import StaticPredictor
 from utilities import Sentence
-from maxEntropyModel import load_labelled_sent
+from maxEntropyModel import load_labelled_sent, loadUsefulTrainingData, loadWordListDict
 import os
 import unittest
 
@@ -16,6 +16,7 @@ class TestStaticPredictor(unittest.TestCase):
 		static_aspect_list_file = 'predictor_data/static_aspect_list.txt'
 		self.staticPredictor.loadParams(params_file)
 		self.staticPredictor.loadStaticAspectList(static_aspect_list_file)
+		self.staticPredictor.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict.txt')
 
 	def testPredictForOneSentence(self):
 		# create test sentences
@@ -30,11 +31,7 @@ class TestStaticPredictor(unittest.TestCase):
 		# create test sentences
 		static_traning_data_dir = os.path.abspath('static_training_data/')
 
-		sentences = []
-		for data_file in os.listdir(static_traning_data_dir):
-		    if data_file.endswith('labeled.txt'):
-		        sentences.extend(load_labelled_sent(os.path.join(static_traning_data_dir, data_file)))
-
+		sentences = loadUsefulTrainingData(static_traning_data_dir)
 		# accuracy
 		correct = 0.0
 		for sentence in sentences:
