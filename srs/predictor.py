@@ -38,11 +38,11 @@ class StaticPredictor(object):
 		res = train(self.wordlist_dict, self.staticAspectList, training_set[:500], lambda_len)
 
 		self.params = res.x
-		self.saveLambda()
+		self.saveLambda(save_lamda_path)
 
-	def saveLambda(self):
+	def saveLambda(self, save_lamda_path):
 		# save optimized lambda into file
-		lambda_file = open('predictor_data/lambda_opt.txt', 'w')
+		lambda_file = open(save_lamda_path, 'w')
 		json.dump(list(self.params), lambda_file)
 		lambda_file.close()
 
