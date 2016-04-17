@@ -10,7 +10,7 @@ class TestUtilities(unittest.TestCase):
 		product_name = 'Nokia'
 		reviewTrainingFile = product_name + '.txt'
 		self.product = Product(name=product_name)
-		self.product.loadReviewsFromTrainingFile('data/trainingFiles/' + reviewTrainingFile)
+		self.product.loadReviewsFromTrainingFile('../data/trainingFiles/Liu/' + reviewTrainingFile)
 		
 
 	def testLoadReviewsFromTrainingFile(self):
