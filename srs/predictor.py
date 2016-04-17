@@ -2,7 +2,8 @@ import os
 import json
 import sys
 import numpy as np
-from maxEntropyModel import cond_prob, loadWordListDict, train, loadUsefulTrainingData
+from maxEntropyModel import cond_prob, loadWordListDict, train
+from utilities import loadUsefulTrainingData
 
 class StaticPredictor(object):
 	"""

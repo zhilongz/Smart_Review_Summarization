@@ -1,7 +1,7 @@
 
 from predictor import StaticPredictor
-from utilities import Sentence
-from maxEntropyModel import load_labelled_sent, loadTrainingData, loadUsefulTrainingData, loadWordListDict
+from utilities import Sentence, loadUsefulTrainingData, loadTrainingData
+from maxEntropyModel import loadWordListDict
 import os
 import unittest
 
