@@ -11,14 +11,11 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import re
 from nltk.stem import SnowballStemmer
 from utilities import Sentence
+import json
 
 
-def loadWordListDict(word_list_dict_path):
-    #load a list of features words extracted and acts as the dynamic aspect. The length of this list will determine the size of the model
-    import json
-    wordlist_dict = json.load(open(word_list_dict_path, 'r'))
-
-    print "wordlist_dict has {0} keys.".format(len(wordlist_dict))
+def loadWordListDict(wordlist_dict_path):
+    wordlist_dict = json.load(open(wordlist_dict_path, 'r'))
 
     return wordlist_dict
 
@@ -143,36 +140,6 @@ def train(wordlist_dict, static_aspect_list,ls_list,lambda_len):
     """
     see for list of method: http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.optimize.minimize.html
     """
-
-def loadUsefulTrainingData(static_training_data_dir):
-    import os
-    sentences = []
-    for data_file in os.listdir(static_training_data_dir):
-        if data_file.endswith('labeled.txt'):
-            sentences.extend(load_labelled_sent(os.path.join(static_training_data_dir, data_file)))
-    
-    useful_sentences = []
-    for sent in sentences:
-        if sent.labeled_aspects not in ['no feature', 'other features']:
-            useful_sentences.append(sent)
-
-    return useful_sentences
-
-def loadTrainingData(static_training_data_dir):
-    import os
-    sentences = []
-    for data_file in os.listdir(static_training_data_dir):
-        if data_file.endswith('labeled.txt'):
-            sentences.extend(load_labelled_sent(os.path.join(static_training_data_dir, data_file)))
-    return sentences
-
-def load_labelled_sent(file_name): 
-    with open(file_name) as f:
-        ls_list =[]
-        for line in f.readlines():
-            line_splitted = line.split('***')
-            ls_list.append(Sentence(content=line_splitted[1],labeled_aspects=line_splitted[0]))
-    return ls_list 
 
     
     

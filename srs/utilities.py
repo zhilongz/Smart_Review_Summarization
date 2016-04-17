@@ -3,6 +3,7 @@ from external.potts_tokenizer import PottsTokenizer
 import nltk
 import json
 import string
+import os
 
 def tokenize(string):
     """
@@ -11,6 +12,36 @@ def tokenize(string):
     """
     tokenizer = PottsTokenizer(preserve_case=False)
     return tokenizer.tokenize(string)
+
+def loadUsefulTrainingData(static_training_data_dir):
+    import os
+    sentences = []
+    for data_file in os.listdir(static_training_data_dir):
+        if data_file.endswith('labeled.txt'):
+            sentences.extend(loadTrainingDataFromFile(os.path.join(static_training_data_dir, data_file)))
+    
+    useful_sentences = []
+    for sent in sentences:
+        if sent.labeled_aspects not in ['no feature', 'other features']:
+            useful_sentences.append(sent)
+
+    return useful_sentences
+
+def loadTrainingData(static_training_data_dir):
+    import os
+    sentences = []
+    for data_file in os.listdir(static_training_data_dir):
+        if data_file.endswith('labeled.txt'):
+            sentences.extend(loadTrainingDataFromFile(os.path.join(static_training_data_dir, data_file)))
+    return sentences
+
+def loadTrainingDataFromFile(file_name): 
+    with open(file_name) as f:
+        sentences =[]
+        for line in f.readlines():
+            line_splitted = line.split('***')
+            sentences.append(Sentence(content=line_splitted[1],labeled_aspects=line_splitted[0]))
+    return sentences 
 
 class Sentence(object):
 

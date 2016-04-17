@@ -2,7 +2,8 @@ import os
 import json
 import sys
 import numpy as np
-from maxEntropyModel import cond_prob, loadWordListDict, train, loadUsefulTrainingData
+from maxEntropyModel import cond_prob, loadWordListDict, train
+from utilities import loadUsefulTrainingData
 
 class StaticPredictor(object):
 	"""
@@ -22,32 +23,26 @@ class StaticPredictor(object):
 		file.close()
 		self.params = params
 
-	def loadStaticAspectList(self, static_aspect_list_file):
-		file = open(static_aspect_list_file, 'r')
-		static_aspect_list = json.load(file)
-		file.close()
-		self.staticAspectList = sorted(static_aspect_list)
+	def loadWordListDict(self, wordlist_dict_path):
+		self.wordlist_dict = loadWordListDict(wordlist_dict_path)
+		self.staticAspectList = sorted(self.wordlist_dict.keys())
 
-
-	def train(self):
-		self.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_1.txt')
-		print self.wordlist_dict
-		self.loadStaticAspectList('predictor_data/static_aspect_list.txt')
-		print self.staticAspectList
-		static_traning_data_dir = os.path.abspath('static_training_data/')
-		training_set = loadUsefulTrainingData(static_traning_data_dir)
-
-		print "training sentences: {0}".format(len(training_set))
+	def train(self, wordlist_dict_path, static_training_data_dir, save_lamda_path):
+		# load wordlist_dict and static_aspect_list
+		self.loadWordListDict(wordlist_dict_path)
+		
+		# load training data
+		training_set = loadUsefulTrainingData(static_training_data_dir)
 
 		lambda_len = len(self.wordlist_dict)*len(self.staticAspectList)
 		res = train(self.wordlist_dict, self.staticAspectList, training_set[:500], lambda_len)
 
 		self.params = res.x
-		self.saveLambda()
+		self.saveLambda(save_lamda_path)
 
-	def saveLambda(self):
+	def saveLambda(self, save_lamda_path):
 		# save optimized lambda into file
-		lambda_file = open('predictor_data/lambda_opt.txt', 'w')
+		lambda_file = open(save_lamda_path, 'w')
 		json.dump(list(self.params), lambda_file)
 		lambda_file.close()
 
@@ -79,13 +74,12 @@ class StaticPredictor(object):
 
 def main():
 	staticPredictor = StaticPredictor()
-	staticPredictor.train()
-	# staticPredictor.loadParams('predictor_data/lambda_opt.txt')
-	# staticPredictor.loadStaticAspectList('predictor_data/static_aspect_list.txt')
-	# for i in range(11):
-	# 	print staticPredictor.staticAspectList[i], staticPredictor.params[i*11:(i+1)*11]
 
+	wordlist_dict_path = 'predictor_data/wordlist_dict_1.txt'
+	static_training_data_dir = 'static_training_data/'
+	save_lamda_path = 'predictor_data/lambda_opt.txt'
 
+	staticPredictor.train(wordlist_dict_path, static_training_data_dir, save_lamda_path)
 
 if __name__ == '__main__':
 	main()
