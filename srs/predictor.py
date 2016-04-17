@@ -74,13 +74,12 @@ class StaticPredictor(object):
 
 def main():
 	staticPredictor = StaticPredictor()
-	staticPredictor.train()
-	# staticPredictor.loadParams('predictor_data/lambda_opt.txt')
-	# staticPredictor.loadStaticAspectList('predictor_data/static_aspect_list.txt')
-	# for i in range(11):
-	# 	print staticPredictor.staticAspectList[i], staticPredictor.params[i*11:(i+1)*11]
 
+	wordlist_dict_path = 'predictor_data/wordlist_dict_1.txt'
+	static_training_data_dir = 'static_training_data/'
+	save_lamda_path = 'predictor_data/lambda_opt.txt'
 
+	staticPredictor.train(wordlist_dict_path, static_training_data_dir, save_lamda_path)
 
 if __name__ == '__main__':
 	main()
