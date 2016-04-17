@@ -1,0 +1,13 @@
+{
+    "battery": ["batteri", "charger", "charg"], 
+    "pictures": ["pictur", "imag", "pic", "photo"], 
+    "price": ["cheap","cheaper", "expens", "afford", "price"], 
+    "zoom": ["zoom", "len", "optic"], 
+    "ease of use": ["easi", "simpl", "easili", "simpli", "use"], 
+    "detection": ["detect", "auto", "mode", "smart", "focus", "flash"], 
+    "design": ["design", "nice", "beatiful", "color", "pretti"], 
+    "video": ["clear", "video", "movie", "record"], 
+    "quality": ["qualiti"], 
+    "screen": ["screen", "display", "touch"], 
+    "size": ["size", "big", "small", "fit", "carri", "pocket", "bulki", "compact"]
+}
