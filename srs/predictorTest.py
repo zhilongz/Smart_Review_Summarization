@@ -1,7 +1,7 @@
 
 from predictor import StaticPredictor
 from utilities import Sentence
-from maxEntropyModel import load_labelled_sent, loadUsefulTrainingData, loadWordListDict
+from maxEntropyModel import load_labelled_sent, loadTrainingData, loadUsefulTrainingData, loadWordListDict
 import os
 import unittest
 
@@ -12,15 +12,15 @@ class TestStaticPredictor(unittest.TestCase):
 		A method that is run before each unit test in this class.
 		"""
 		self.staticPredictor = StaticPredictor()
-		params_file = 'predictor_data/lambda_opt.txt'
+		params_file = 'predictor_data/lambda_opt_1.txt'
 		static_aspect_list_file = 'predictor_data/static_aspect_list.txt'
 		self.staticPredictor.loadParams(params_file)
 		self.staticPredictor.loadStaticAspectList(static_aspect_list_file)
-		self.staticPredictor.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict.txt')
+		self.staticPredictor.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_1.txt')
 
 	def testPredictForOneSentence(self):
 		# create test sentences
-		content = ".It's small size enough to be easily held in one hand, and is so light as to be barely  noticeable when carried in a small padded bag hung around the neck."
+		content = "It's small size enough to be easily held in one hand, and is so light as to be barely  noticeable when carried in a small padded bag hung around the neck."
 		sentence = Sentence(content=content)
 
 		# accuracy
@@ -31,6 +31,7 @@ class TestStaticPredictor(unittest.TestCase):
 		# create test sentences
 		static_traning_data_dir = os.path.abspath('static_training_data/')
 
+		# sentences = loadTrainingData(static_traning_data_dir)
 		sentences = loadUsefulTrainingData(static_traning_data_dir)
 		# accuracy
 		correct = 0.0
