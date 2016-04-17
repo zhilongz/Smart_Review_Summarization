@@ -8,4 +8,4 @@
 #$ -pe singlenode 1
 #$ -N training
 
-python predictor.py 
+python predictor.py > training.out
