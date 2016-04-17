@@ -19,7 +19,7 @@ class TestStaticPredictor(unittest.TestCase):
 
 	def testPredictForOneSentence(self):
 		# create test sentences
-		content = "It's small size enough to be easily held in one hand, and is so light as to be barely  noticeable when carried in a small padded bag hung around the neck."
+		content = "It produces great photo!"
 		sentence = Sentence(content=content)
 
 		# accuracy
