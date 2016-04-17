@@ -1,1 +1,1 @@
-["price", "pictures", "video", "zoom", "size", "design", "battery", "screen", "detection", "ease of use", "quality", "other features", "no feature"]
+["price", "pictures", "video", "zoom", "size", "design", "battery", "screen", "detection", "ease of use", "quality"]
