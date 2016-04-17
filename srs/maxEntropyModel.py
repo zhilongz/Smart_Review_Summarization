@@ -118,7 +118,7 @@ def loss_func(lam_vec,wordlist_dict, static_aspect_list,ls_list):
     regularization_term = 0
     for lam in lam_vec:
         regularization_term += abs(lam)
-    regularization_term = regularization_term*1e-3
+    regularization_term = regularization_term*1e-1
 
 
     print loss*(-1) + regularization_term   
