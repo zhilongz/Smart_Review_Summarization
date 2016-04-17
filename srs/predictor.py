@@ -23,12 +23,9 @@ class StaticPredictor(object):
 		file.close()
 		self.params = params
 
-	def loadStaticAspectList(self, static_aspect_list_file):
-		file = open(static_aspect_list_file, 'r')
-		static_aspect_list = json.load(file)
-		file.close()
-		self.staticAspectList = sorted(static_aspect_list)
-
+	def loadWordListDict(self, wordlist_dict_path):
+		self.wordlist_dict = loadWordListDict(wordlist_dict_path)
+		self.staticAspectList = sorted(self.wordlist_dict.keys())
 
 	def train(self):
 		self.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_1.txt')
