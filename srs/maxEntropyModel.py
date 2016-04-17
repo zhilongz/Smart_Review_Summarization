@@ -115,8 +115,14 @@ def loss_func(lam_vec,wordlist_dict, static_aspect_list,ls_list):
         loss_sent = np.inner(lam_vec[labeled_aspect_idx*f_len:(labeled_aspect_idx+1)*f_len],f) - np.log(deno)
         loss = loss + loss_sent
 
-    print loss*(-1)    
-    return loss*(-1)
+    regularization_term = 0
+    for lam in lam_vec:
+        regularization_term += lam*lam
+    regularization_term = regularization_term*1e-3
+
+
+    print loss*(-1) + regularization_term   
+    return loss*(-1) + regularization_term
 
 def generateInitialGuess(lambda_len, static_aspect_list_len=None):
     if static_aspect_list_len:
