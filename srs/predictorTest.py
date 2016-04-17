@@ -12,11 +12,10 @@ class TestStaticPredictor(unittest.TestCase):
 		A method that is run before each unit test in this class.
 		"""
 		self.staticPredictor = StaticPredictor()
-		params_file = 'predictor_data/lambda_opt_1.txt'
-		static_aspect_list_file = 'predictor_data/static_aspect_list.txt'
-		self.staticPredictor.loadParams(params_file)
-		self.staticPredictor.loadStaticAspectList(static_aspect_list_file)
-		self.staticPredictor.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_1.txt')
+		params_path = 'predictor_data/lambda_opt_1.txt'
+		wordlist_dict_path = 'predictor_data/wordlist_dict_1.txt'
+		self.staticPredictor.loadParams(params_path)
+		self.staticPredictor.loadWordListDict(wordlist_dict_path)
 
 	def testPredictForOneSentence(self):
 		# create test sentences
