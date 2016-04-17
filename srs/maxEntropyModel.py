@@ -11,14 +11,11 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import re
 from nltk.stem import SnowballStemmer
 from utilities import Sentence
+import json
 
 
-def loadWordListDict(word_list_dict_path):
-    #load a list of features words extracted and acts as the dynamic aspect. The length of this list will determine the size of the model
-    import json
-    wordlist_dict = json.load(open(word_list_dict_path, 'r'))
-
-    print "wordlist_dict has {0} keys.".format(len(wordlist_dict))
+def loadWordListDict(wordlist_dict_path):
+    wordlist_dict = json.load(open(wordlist_dict_path, 'r'))
 
     return wordlist_dict
 
