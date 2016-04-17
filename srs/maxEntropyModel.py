@@ -138,7 +138,7 @@ def generateInitialGuess(lambda_len, static_aspect_list_len=None):
 def train(wordlist_dict, static_aspect_list,ls_list,lambda_len):
     """ optimization by minimizing the loss function returns lambda* """
     lambda_guess = generateInitialGuess(lambda_len, len(static_aspect_list))
-    res = minimize(loss_func, lambda_guess, args=(wordlist_dict, static_aspect_list,ls_list), method='BFGS', options={'gtol': 1e-3, 'disp': True})
+    res = minimize(loss_func, lambda_guess, args=(wordlist_dict, static_aspect_list,ls_list), method='BFGS', options={'gtol': 1e-2, 'disp': True, 'maxiter': 200})
     return res
     """
     see for list of method: http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.optimize.minimize.html
