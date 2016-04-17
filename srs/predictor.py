@@ -27,15 +27,12 @@ class StaticPredictor(object):
 		self.wordlist_dict = loadWordListDict(wordlist_dict_path)
 		self.staticAspectList = sorted(self.wordlist_dict.keys())
 
-	def train(self):
-		self.wordlist_dict = loadWordListDict('predictor_data/wordlist_dict_1.txt')
-		print self.wordlist_dict
-		self.loadStaticAspectList('predictor_data/static_aspect_list.txt')
-		print self.staticAspectList
-		static_traning_data_dir = os.path.abspath('static_training_data/')
-		training_set = loadUsefulTrainingData(static_traning_data_dir)
-
-		print "training sentences: {0}".format(len(training_set))
+	def train(self, wordlist_dict_path, static_training_data_dir, save_lamda_path):
+		# load wordlist_dict and static_aspect_list
+		self.loadWordListDict(wordlist_dict_path)
+		
+		# load training data
+		training_set = loadUsefulTrainingData(static_training_data_dir)
 
 		lambda_len = len(self.wordlist_dict)*len(self.staticAspectList)
 		res = train(self.wordlist_dict, self.staticAspectList, training_set[:500], lambda_len)
