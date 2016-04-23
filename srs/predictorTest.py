@@ -45,8 +45,8 @@ class TestStaticPredictor(unittest.TestCase):
 		print 'The classification error is: %.2f' % (class_error)
 
 		# save correct_idx
-		with open('testing_results/correct_idx.txt', 'w+') as correct_idx_file:
-			json.dump(correct_idx, correct_idx_file)
+		# with open('testing_results/correct_idx.txt', 'w+') as correct_idx_file:
+		# 	json.dump(correct_idx, correct_idx_file)
 
 if __name__ == '__main__':
     unittest.main()
