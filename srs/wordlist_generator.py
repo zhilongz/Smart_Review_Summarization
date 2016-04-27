@@ -8,7 +8,6 @@ import operator
 static_training_data_dir = 'static_training_data/'
 training_set = loadTrainingData(static_training_data_dir)
 
-
 for sent in training_set:
 	sent.tokens= tokenize(sent.content) # tokenize all sentences 
 	if sent.labeled_aspects == 'other features':
@@ -18,6 +17,10 @@ for sent in training_set:
 static_aspect_dic = defaultdict(list)
 for sent in training_set:
 	static_aspect_dic[sent.labeled_aspects] = static_aspect_dic[sent.labeled_aspects] + sent.tokens
+
+sent_count_dic = dict.fromkeys(static_aspect_dic.keys(),0)
+for sent in training_set:
+	sent_count_dic[sent.labeled_aspects] = sent_count_dic[sent.labeled_aspects] + 1
 
 # create a two keys dictionary
 static_word_dict = {}
@@ -39,10 +42,11 @@ all_word_freq_dic = Counter(all_word_list)
 nd = len(training_set)*1.0
 idf_dict = dict.fromkeys(static_word_dict.keys(),[])
 for tuple_keys in idf_dict:
+	static_key = tuple_keys[0]
 	key_word = tuple_keys[1]
 	key_word_count = all_word_freq_dic[key_word]
 	idf = np.log(nd/(1.0+key_word_count)) # this should potentially be change
-	idf_dict[tuple_keys]= static_word_dict[tuple_keys]*idf
+	idf_dict[tuple_keys]= static_word_dict[tuple_keys]*idf/sent_count_dic[static_key]
 
 # generate ordered list for each class
 output_dict ={}
@@ -56,10 +60,10 @@ for static_keys in static_aspect_dic:
 	output_dict[static_keys]  = sorted_list
 
 #prepare for output to txt file
-save_wordlist_path= 'predictor_data/wordlist_dict_idf_value.txt'
+save_wordlist_path= 'predictor_data/wordlist_dict_idf_value_snow.txt'
 _file = open(save_wordlist_path, 'w')
 json.dump(output_dict, _file)
 _file.close()
 
 
-print output_dict
+# print output_dict

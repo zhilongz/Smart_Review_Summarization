@@ -20,12 +20,12 @@ def tokenize(string):
 
     #filter out stopwords 
     STOPWORDS = set(nltk.corpus.stopwords.words('english'))
-    STOPWORDS.update(('nikon','would','does','got',"doesn't"))
+    STOPWORDS.update(('nikon','would','does','got',"doesn't",'well'))
     token_list = [word for word in token_list if word not in STOPWORDS]
 
     #stemmer 
-    stemmer = PorterStemmer()
-    #stemmer = SnowballStemmer("english")
+    # stemmer = PorterStemmer()
+    stemmer = SnowballStemmer("english")
     token_stem_list = [stemmer.stem(token) for token in token_list]
 
     return token_stem_list
