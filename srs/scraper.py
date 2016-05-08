@@ -56,7 +56,7 @@ class AmazonReviewScraper:
                     sentenceContent_list = getSentencesFromReview(r.text)
                     sentences = []
                     for content in sentenceContent_list:
-                        output_str += "***" + content + '\n'
+                        output_str += content + '\n'
                         sentence = Sentence(content=content)
                         sentences.append(sentence)
                     review = Review(sentences=sentences)
