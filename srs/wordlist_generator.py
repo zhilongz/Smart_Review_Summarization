@@ -73,21 +73,19 @@ def save2doc(output_dict,save_wordlist_path):
 	json.dump(output_dict, _file)
 	_file.close()
 
-def main():
+def gen_wordlist(static_training_data_dir,save_wordlist_path,num_key_word):
 	#load reviews 
-	static_training_data_dir = 'static_training_data/'
 	training_set = loadTrainingData(static_training_data_dir)
 	#merge other feature as no feature 
 	merge_otherft(training_set)
-
-	# define number of key word to remain in the order tf-idf ranked list of words
-	num_key_word = 10
 	output_dict = tf_idf(training_set,num_key_word)
-
 	# save output_dict
-	save_wordlist_path= 'predictor_data/wordlist_dict_idf_value_snow.txt'
 	save2doc(output_dict,save_wordlist_path)
 
 if __name__ == '__main__':
-	main()
+	static_training_data_dir = 'static_training_data/'
+	save_wordlist_path = 'predictor_data/wordlist_dict_idf_value_snow.txt'
+	# define number of key word to remain in the order tf-idf ranked list of words
+	num_key_word = 10
+	gen_wordlist(static_training_data_dir,save_wordlist_path,num_key_word)
 		
