@@ -6,6 +6,37 @@ import string
 import os
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.snowball import SnowballStemmer
+
+def getSentencesFromReview(reviewContent):
+    """
+    INPUT: a single review consist of serveral sentences
+    OUTPUT: a list of single sentences
+    """
+    sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+    sentences = sent_detector.tokenize(reviewContent)
+    # split agglomerated sentences
+    for m in range(len(sentences)):
+        subsentences = sentences[m].split('.')
+        new_sentences = []
+        new_subsen = subsentences[0]
+        for n in range(1,len(subsentences)):
+            if subsentences[n] and (subsentences[n][0] in string.ascii_uppercase):
+                new_subsen += '.'
+                new_sentences.append(new_subsen)
+                new_subsen = subsentences[n]
+            else:
+                new_subsen += '.' + subsentences[n]
+        new_sentences.append(new_subsen)
+        sentences[m] = new_sentences
+    # collect all the single sentence into final_sentence list
+    final_sentences = []
+    for sentence in sentences:
+        if isinstance(sentence, list):
+            final_sentences.extend(sentence)
+        else:
+            final_sentences.append(sentence)
+    return final_sentences
+
 def tokenize(string):
     """
     INPUT: string
@@ -60,11 +91,21 @@ def loadTrainingDataFromFile(file_name):
             sentences.append(Sentence(content=line_splitted[1],labeled_aspects=line_splitted[0]))
     return sentences 
 
+def loadScraperDataFromFile(file_name): 
+    with open(file_name) as f:
+        sentences =[]
+        for line in f.readlines():
+            if line != "\n":
+                sentences.append(Sentence(content=line))
+    return sentences 
+
 class Sentence(object):
 
-    def __init__(self, content, tokens=[], labeled_aspects='', sentiment=None):
+    def __init__(self, content, tokens=None, labeled_aspects='', sentiment=None):
         self.content = content
         self.tokens = tokens
+        if not self.tokens:
+            self.tokens = []
         self.labeled_aspects = labeled_aspects
         self.sentiment = sentiment
         self.pos_tagged_tokens = []
@@ -118,17 +159,21 @@ class AspectPattern(object):
 
 class Review(object):
 
-    def __init__(self, title=None, sentences=[], star=None):
+    def __init__(self, title=None, sentences=None, star=None):
         self.title = title
         self.sentences = sentences
+        if not self.sentences:
+            self.sentences = []
         self.star = star
 
 
 class Product(object):
 
-    def __init__(self, name, reviews=[]):
+    def __init__(self, name, reviews=None):
         self.name = name
         self.reviews = reviews
+        if not self.reviews:
+            self.reviews = []
 
     def loadReviewsFromTrainingFile(self, reviewTrainingFile):
         """
