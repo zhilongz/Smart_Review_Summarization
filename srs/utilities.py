@@ -4,14 +4,31 @@ import nltk
 import json
 import string
 import os
-
+from nltk.stem.porter import PorterStemmer
+from nltk.stem.snowball import SnowballStemmer
 def tokenize(string):
     """
     INPUT: string
     OUTPUT: a list of words
     """
+    import re
     tokenizer = PottsTokenizer(preserve_case=False)
-    return tokenizer.tokenize(string)
+    token_list = tokenizer.tokenize(string)
+    punctuation = re.compile(r'[-.?!,":;$*()|0-9]') # remove these punctuations and number 
+    token_list = [punctuation.sub("", word) for word in token_list]  
+    token_list = filter(None, token_list) #filters empty   
+
+    #filter out stopwords 
+    STOPWORDS = set(nltk.corpus.stopwords.words('english'))
+    STOPWORDS.update(('nikon','would','does','got',"doesn't",'well'))
+    token_list = [word for word in token_list if word not in STOPWORDS]
+
+    #stemmer 
+    # stemmer = PorterStemmer()
+    stemmer = SnowballStemmer("english")
+    token_stem_list = [stemmer.stem(token) for token in token_list]
+
+    return token_stem_list
 
 def loadUsefulTrainingData(static_training_data_dir):
     import os
@@ -53,6 +70,7 @@ class Sentence(object):
         self.pos_tagged_tokens = []
         self.dynamic_aspects = []
         self.static_aspect = None
+        self.score = 0.0
         
 
     def tokenize(self):
