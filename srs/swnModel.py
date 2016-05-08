@@ -1,6 +1,6 @@
 from nltk.corpus import sentiwordnet as swn
 from predictor import StaticPredictor
-from utilities import loadTrainingDataFromFile
+from utilities import loadScraperDataFromFile
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np 
@@ -114,15 +114,15 @@ def swnModel(params_file, wordlist_dict_path, figure_filename, prod1ID, prod2ID=
     staticPredictor.loadParams(params_file)
     staticPredictor.loadWordListDict(wordlist_dict_path)
 
-    prod1_data_file_dir = 'static_training_data/'+ prod1ID + '_labeled.txt'
-    prod1Review = loadTrainingDataFromFile(prod1_data_file_dir)
+    prod1_data_file_dir = 'scraper_data/'+ prod1ID + '.txt'
+    prod1Review = loadScraperDataFromFile(prod1_data_file_dir)
     prod1score = get_prod_score(prod1Review,staticPredictor)
     
     if prod2ID==None:
         box_plot(prod1score,figure_filename,prod1ID)
     else:
-        prod2_data_file_dir = 'static_training_data/'+ prod2ID + '_labeled.txt'
-        prod2Review = loadTrainingDataFromFile(prod2_data_file_dir)
+        prod2_data_file_dir = 'scraper_data/'+ prod2ID + '.txt'
+        prod2Review = loadScraperDataFromFile(prod2_data_file_dir)
         prod2score = get_prod_score(prod2Review,staticPredictor)
         box_plot_compare(prod1score,prod2score,figure_filename,prod1ID,prod2ID)
 

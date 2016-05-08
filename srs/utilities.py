@@ -91,6 +91,14 @@ def loadTrainingDataFromFile(file_name):
             sentences.append(Sentence(content=line_splitted[1],labeled_aspects=line_splitted[0]))
     return sentences 
 
+def loadScraperDataFromFile(file_name): 
+    with open(file_name) as f:
+        sentences =[]
+        for line in f.readlines():
+            if line != "\n":
+                sentences.append(Sentence(content=line))
+    return sentences 
+
 class Sentence(object):
 
     def __init__(self, content, tokens=None, labeled_aspects='', sentiment=None):
