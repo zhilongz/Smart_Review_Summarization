@@ -62,9 +62,11 @@ def loadTrainingDataFromFile(file_name):
 
 class Sentence(object):
 
-    def __init__(self, content, tokens=[], labeled_aspects='', sentiment=None):
+    def __init__(self, content, tokens=None, labeled_aspects='', sentiment=None):
         self.content = content
         self.tokens = tokens
+        if not self.tokens:
+            self.tokens = []
         self.labeled_aspects = labeled_aspects
         self.sentiment = sentiment
         self.pos_tagged_tokens = []
@@ -118,17 +120,21 @@ class AspectPattern(object):
 
 class Review(object):
 
-    def __init__(self, title=None, sentences=[], star=None):
+    def __init__(self, title=None, sentences=None, star=None):
         self.title = title
         self.sentences = sentences
+        if not self.sentences:
+            self.sentences = []
         self.star = star
 
 
 class Product(object):
 
-    def __init__(self, name, reviews=[]):
+    def __init__(self, name, reviews=None):
         self.name = name
         self.reviews = reviews
+        if not self.reviews:
+            self.reviews = []
 
     def loadReviewsFromTrainingFile(self, reviewTrainingFile):
         """
