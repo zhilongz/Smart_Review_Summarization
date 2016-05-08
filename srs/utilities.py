@@ -6,6 +6,37 @@ import string
 import os
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.snowball import SnowballStemmer
+
+def getSentencesFromReview(reviewContent):
+    """
+    INPUT: a single review consist of serveral sentences
+    OUTPUT: a list of single sentences
+    """
+    sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+    sentences = sent_detector.tokenize(reviewContent)
+    # split agglomerated sentences
+    for m in range(len(sentences)):
+        subsentences = sentences[m].split('.')
+        new_sentences = []
+        new_subsen = subsentences[0]
+        for n in range(1,len(subsentences)):
+            if subsentences[n] and (subsentences[n][0] in string.ascii_uppercase):
+                new_subsen += '.'
+                new_sentences.append(new_subsen)
+                new_subsen = subsentences[n]
+            else:
+                new_subsen += '.' + subsentences[n]
+        new_sentences.append(new_subsen)
+        sentences[m] = new_sentences
+    # collect all the single sentence into final_sentence list
+    final_sentences = []
+    for sentence in sentences:
+        if isinstance(sentence, list):
+            final_sentences.extend(sentence)
+        else:
+            final_sentences.append(sentence)
+    return final_sentences
+
 def tokenize(string):
     """
     INPUT: string
