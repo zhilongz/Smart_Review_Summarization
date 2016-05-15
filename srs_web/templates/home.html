@@ -1,0 +1,39 @@
+<html>
+<head>
+        <link rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+              integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+              crossorigin="anonymous"></link>
+        <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300'
+              rel='stylesheet' type='text/css'></link>
+        <script src="http://code.jquery.com/jquery-2.2.0.min.js" ></script>
+        
+</head>
+
+<body>
+
+<h1>Smart Review Summarization</h1>
+
+<div>
+	<form name="input_form"
+	      id="input_form"
+	      action=""
+	      method="POST"
+	      enctype="multipart/form-data"
+	      >
+	    <div class="form-group">
+	        <label for="product_id">Product ID</label>
+	        <input name="product_id"
+	               id="product_id"
+	               type="text"
+	               class="form-control"
+	               placeholder="B00HZE2PYI" />
+	    </div>
+	    <input type="submit" value="Summarize" class="btn btn-default"/>
+	</form>
+
+</div>
+<script src="static/run.js"></script>
+
+</body>
+</html>
