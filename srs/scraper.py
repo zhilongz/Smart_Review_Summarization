@@ -43,30 +43,32 @@ class AmazonReviewScraper:
         count = 0
         output_str = ""
         reviews = []
-        for r in rs.full_reviews():
-            count += 1
-            
-            try:
-                if self.debug:
-                    logging.debug(
-                        "{} | {} | {}".format(
-                            r.id, r.date, self._encode_safe(
-                                r.text)))
-                if r.text != "None":
-                    sentenceContent_list = getSentencesFromReview(r.text)
-                    sentences = []
-                    for content in sentenceContent_list:
-                        output_str += content + '\n'
-                        sentence = Sentence(content=content)
-                        sentences.append(sentence)
-                    review = Review(sentences=sentences)
-                    reviews.append(review)
-            except:
-                logging.warn(
-                    'Encoding problem with review {}'.format(
-                        r.id))
         with open(filename, "a") as fh:
-            fh.write(output_str)
+            for r in rs.full_reviews():
+                count += 1
+                
+                try:
+                    if self.debug:
+                        logging.debug(
+                            "{} | {} | {}".format(
+                                r.id, r.date, self._encode_safe(
+                                    r.text)))
+                    if r.text != "None":
+                        sentenceContent_list = getSentencesFromReview(self._encode_safe(r.text))
+                        print "First sentence: " + sentenceContent_list[0]
+                        sentences = []
+                        for content in sentenceContent_list:
+                            fh.write(content + '\n')
+                            sentence = Sentence(content=content)
+                            sentences.append(sentence)
+                        review = Review(sentences=sentences)
+                        reviews.append(review)
+                except:
+                    logging.warn(
+                        'Encoding problem with review {}'.format(
+                            r.id))
+        
+            
 
         return count, reviews
 
