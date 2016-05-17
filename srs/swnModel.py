@@ -22,7 +22,10 @@ def sentence_score(ls):
     neg_score = 0.0
     num_valid_word = 0.1
     for w in word_list:
-        res = swn.senti_synsets(w)
+        try:
+            res = swn.senti_synsets(w)
+        except:
+            print w
         if res: # if not empty 
             pos_score += res[0]._pos_score
             neg_score += res[0]._neg_score
