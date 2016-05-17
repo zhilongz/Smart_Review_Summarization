@@ -1,4 +1,14 @@
 
+function renderResult(d,tStatus, jqxhr){
+    $("#progress")[0].innerHTML = "Done! Please check your results below.";
+    product_id = d;
+    var resultUrl = "/srs_result/" + product_id;
+
+    $("#resultLink")[0].href = resultUrl;
+    $("#resultLink")[0].innerHTML = product_id+" srs result";
+
+}
+
 $("#input_form").submit(function(e){
     
     var formData = new FormData($(this)[0]);
@@ -9,10 +19,10 @@ $("#input_form").submit(function(e){
         data: formData,
         async: true,
         success: function(data){
-            alert("Your job is to run shortly with id " + data);
+            alert("Your summarization for " + data + " is ready!");
             // run job
-            // id = data;
-            // run_job(id);
+            id = data;
+            renderResult(id);
         },
         cache: false,
         contentType: false,
