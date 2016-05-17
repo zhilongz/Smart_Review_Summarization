@@ -37,7 +37,10 @@ def eval_f_vec(sentence, wordlist_dict):
         stemmer = SnowballStemmer('english')
         for i in range(len(word_list)):
             word = word_list[i]
-            stemmedWord = stemmer.stem(word)
+            try:
+                stemmedWord = stemmer.stem(word)
+            except:
+                print word
             word_list[i] = stemmedWord
 
         sentence.tokens = word_list
