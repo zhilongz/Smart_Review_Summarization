@@ -24,12 +24,11 @@ def sentence_score(ls):
     for w in word_list:
         try:
             res = swn.senti_synsets(w)
-        except:
-            print w
-        if res: # if not empty 
             pos_score += res[0]._pos_score
             neg_score += res[0]._neg_score
             num_valid_word += 1
+        except:
+            pass
     ls.score = (pos_score - neg_score)/num_valid_word
     
     """

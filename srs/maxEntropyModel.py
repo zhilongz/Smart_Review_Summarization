@@ -39,9 +39,9 @@ def eval_f_vec(sentence, wordlist_dict):
             word = word_list[i]
             try:
                 stemmedWord = stemmer.stem(word)
+                word_list[i] = stemmedWord
             except:
                 print word
-            word_list[i] = stemmedWord
 
         sentence.tokens = word_list
 
