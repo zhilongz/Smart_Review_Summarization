@@ -1,5 +1,8 @@
 from scraper import main as scraper_main
 from swnModel import swnModel
+from predictor import 
+from srs import settings
+import os
 
 
 def main():
@@ -13,7 +16,7 @@ def main():
 		scraper_main(prod2ID)
 
 	# prepare static predictor params  
-	params_file = 'predictor_data/lambda_opt_regu2.txt'
+	params_file = os.path.join(settings["predictor_data"],'lambda_opt_regu2.txt')
 	wordlist_dict_path = 'predictor_data/wordlist_dict_1.txt'
 	
 	# sentiment analysis and plot
