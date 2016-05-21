@@ -9,6 +9,7 @@ import logging.config
 import os.path
 from utilities import getSentencesFromReview, Sentence, Review, Product
 import nltk
+from srs import settings
 
 
 class AmazonReviewScraper:
@@ -22,7 +23,7 @@ class AmazonReviewScraper:
         self.logger = logger or logging.getLogger(__name__)
         logging.config.fileConfig(
             os.path.join(
-                os.path.abspath("scraper_data"),
+                settings["scraper_data"],
                 "logging.ini"))
         self.debug = debug
 
@@ -77,7 +78,9 @@ class AmazonReviewScraper:
         Fetches reviews for the Amazon product with the specified ItemId. 
         """
         if not filename:
-            filename = "scraper_data/" + item_id + '.txt'
+            filename = os.path.join(
+                settings["scraper_data"], 
+                item_id + '.txt')
 
         start = time.time()
         p = self.amzn.lookup(ItemId=item_id)
@@ -103,8 +106,22 @@ class AmazonReviewScraper:
                 start))
         return reviews
 
+def isProductScraped(productID):
+
+    scraper_data_folder = settings["scraper_data"]
+    target_data_file_path = os.path.join(scraper_data_folder,
+                productID + ".txt")
+
+    if not os.path.exists(target_data_file_path):
+        return False
+    
+    return True
+
+
 def main(productID):
-    conf_file = "scraper_data/amazon.ini"
+    conf_file = os.path.join(
+                settings["scraper_data"],
+                "amazon.ini")
     conf = ConfigParser(interpolation=ExtendedInterpolation())
     try:
         conf.read(conf_file)

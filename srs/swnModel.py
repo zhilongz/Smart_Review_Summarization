@@ -3,7 +3,9 @@ from predictor import StaticPredictor
 from utilities import loadScraperDataFromFile
 from collections import defaultdict
 import matplotlib.pyplot as plt
-import numpy as np 
+import numpy as np
+import os
+from srs import settings
 
 def sentence_score(ls):
     '''
@@ -29,6 +31,7 @@ def sentence_score(ls):
             num_valid_word += 1
         except:
             pass
+            
     ls.score = (pos_score - neg_score)/num_valid_word
     
     """
@@ -36,21 +39,21 @@ def sentence_score(ls):
     """
 
 def get_prod_score(prodReview,staticPredictor):
-	'''
-	prodReview: a list of sentence object
-	staticPredictor object
-	return a list of individual score sorted for each static aspect via a dictionary
-	'''
-	aspect_list_useful = staticPredictor.staticAspectList[:-1]
-	score_dict = defaultdict(list)
-	for ls in prodReview:
-		ls.static_aspect = staticPredictor.predict(ls) # predict the static aspect
-		sentence_score(ls)
-		for ft in aspect_list_useful:
-	            if ft == ls.static_aspect:
-	                score_dict[ft].append(ls.score)
+    '''
+    prodReview: a list of sentence object
+    staticPredictor object
+    return a list of individual score sorted for each static aspect via a dictionary
+    '''
+    aspect_list_useful = staticPredictor.staticAspectList[:-1]
+    score_dict = defaultdict(list)
+    for ls in prodReview:
+        ls.static_aspect = staticPredictor.predict(ls) # predict the static aspect
+        sentence_score(ls)
+        for ft in aspect_list_useful:
+            if ft == ls.static_aspect:
+                score_dict[ft].append(ls.score)
 
-	return score_dict 
+    return score_dict 
 
 # function for setting the colors of the box plots pairs
 def set_box_color(bp, color):
@@ -111,33 +114,37 @@ def box_plot_compare(prod1score,prod2score,filename,prod1ID,prod2ID):
     plt.tight_layout()
     plt.savefig(filename)
 
-def swnModel(params_file, wordlist_dict_path, figure_filename, prod1ID, prod2ID=None):
+def swnModel(params_filename, wordlist_filename, figure_file_path, prod1ID, prod2ID=None):
     staticPredictor = StaticPredictor()
-    staticPredictor.loadParams(params_file)
-    staticPredictor.loadWordListDict(wordlist_dict_path)
+    staticPredictor.loadParams(params_filename)
+    staticPredictor.loadWordListDict(wordlist_filename)
 
-    prod1_data_file_dir = 'scraper_data/'+ prod1ID + '.txt'
+    prod1_data_file_dir = os.path.join(
+        settings['scraper_data'], 
+        prod1ID + '.txt')
     prod1Review = loadScraperDataFromFile(prod1_data_file_dir)
     prod1score = get_prod_score(prod1Review,staticPredictor)
     
-    if prod2ID==None:
-        box_plot(prod1score,figure_filename,prod1ID)
+    if prod2ID == None:
+        box_plot(prod1score,figure_file_path,prod1ID)
     else:
-        prod2_data_file_dir = 'scraper_data/'+ prod2ID + '.txt'
+        prod2_data_file_dir = os.path.join(
+            settings['scraper_data'], 
+            prod2ID + '.txt')
         prod2Review = loadScraperDataFromFile(prod2_data_file_dir)
         prod2score = get_prod_score(prod2Review,staticPredictor)
-        box_plot_compare(prod1score,prod2score,figure_filename,prod1ID,prod2ID)
+        box_plot_compare(prod1score,prod2score,figure_file_path,prod1ID,prod2ID)
 
 if __name__ == '__main__':
     #example run
-    params_file = 'predictor_data/lambda_opt_regu2.txt'
-    wordlist_dict_path = 'predictor_data/wordlist_dict_1.txt'
+    params_filename = 'lambda_opt_regu2.txt'
+    wordlist_filename = 'wordlist_dict_1.txt'
     prod1ID = 'B00007F8UQ'
     prod2ID = 'B00AW2P98E'
     
-    figure_filename = 'boxplot.png'
-    swnModel(params_file,wordlist_dict_path,figure_filename,prod1ID)
+    figure_file_path = 'boxplot.png'
+    swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID)
 
-    figure_filename = 'boxcompare.png'
-    swnModel(params_file,wordlist_dict_path,figure_filename,prod1ID,prod2ID)
+    figure_file_path = 'boxcompare.png'
+    swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID,prod2ID)
 
