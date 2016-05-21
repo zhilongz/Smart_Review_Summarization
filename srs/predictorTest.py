@@ -1,10 +1,11 @@
 
-from predictor import StaticPredictor
+from predictor import *
 from utilities import Sentence, loadUsefulTrainingData, loadTrainingData
 from maxEntropyModel import loadWordListDict
 import os
 import json
 import unittest
+from srs import settings
 
 class TestStaticPredictor(unittest.TestCase):
 
@@ -13,10 +14,10 @@ class TestStaticPredictor(unittest.TestCase):
 		A method that is run before each unit test in this class.
 		"""
 		self.staticPredictor = StaticPredictor()
-		params_path = 'predictor_data/lambda_opt_regu3.txt'
-		wordlist_dict_path = 'predictor_data/wordlist_dict_1.txt'
-		self.staticPredictor.loadParams(params_path)
-		self.staticPredictor.loadWordListDict(wordlist_dict_path)
+		param_filename = 'lambda_opt_regu3.txt'
+		wordlist_filename = 'wordlist_dict_1.txt'
+		self.staticPredictor.loadParams(param_filename)
+		self.staticPredictor.loadWordListDict(wordlist_filename)
 
 	def testPredictForOneSentence(self):
 		# create test sentences
@@ -29,7 +30,7 @@ class TestStaticPredictor(unittest.TestCase):
 	
 	def testPredictForSentences(self):
 		# create test sentences
-		static_traning_data_dir = os.path.abspath('static_training_data/')
+		static_traning_data_dir = settings["static_training_data"]
 
 		# sentences = loadTrainingData(static_traning_data_dir)
 		sentences = loadUsefulTrainingData(static_traning_data_dir)
