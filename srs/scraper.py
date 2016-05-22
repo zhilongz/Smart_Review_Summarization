@@ -114,8 +114,14 @@ def isProductScraped(productID):
 
     if not os.path.exists(target_data_file_path):
         return False
-    
-    return True
+    else:
+        line_count = 0
+        with open(target_data_file_path, 'r') as f:
+            for line in f:
+                line_count += 1
+                return True
+        if line_count == 0:
+            return False
 
 
 def main(productID):
