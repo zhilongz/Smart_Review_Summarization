@@ -8,7 +8,8 @@ def main(prod1ID, prod2ID, scrapeFlag=True):
 	# scrap data
 	if scrapeFlag:
 		scraper_main(prod1ID)
-		scraper_main(prod2ID)
+		if prod2ID != None:
+			scraper_main(prod2ID)
 
 	# prepare static predictor params  
 	params_filename = 'lambda_opt_regu2.txt'
