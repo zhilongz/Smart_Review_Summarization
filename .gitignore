@@ -17,5 +17,8 @@
 data/*
 *.txt
 
+# config files
+*.ini
+
 # Ipython notebook checkpoint files
 */.ipynb_checkpoints/*
