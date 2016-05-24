@@ -2,7 +2,10 @@ from nltk.corpus import sentiwordnet as swn
 from predictor import StaticPredictor
 from utilities import loadScraperDataFromFile
 from collections import defaultdict
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+
+from matplotlib import pyplot as plt
 import numpy as np
 import os
 from srs import settings
