@@ -1,0 +1,5 @@
+name: srs
+channels:
+  - defaults
+dependencies:
+  - configparser
