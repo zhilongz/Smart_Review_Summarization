@@ -10,8 +10,12 @@
 # Compiled Python modules
 *.pyc
 
+# Images
+*.png
+
 # Data files
 data/*
+*.txt
 
 # Ipython notebook checkpoint files
 */.ipynb_checkpoints/*
