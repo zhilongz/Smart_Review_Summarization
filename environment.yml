@@ -1,5 +1,12 @@
 name: srs
 channels:
   - defaults
+#  - mlsg
 dependencies:
   - configparser
+  - numpy
+  - lxml
+  - nltk
+  - scipy
+  - matplotlib
+#  - amazon_scraper
