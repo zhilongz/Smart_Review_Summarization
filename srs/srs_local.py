@@ -21,7 +21,7 @@ def main(prod1ID, prod2ID, scrapeFlag=True):
 		figure_file_path = os.path.join(plot_folder, prod1ID + '_boxplot.png')
 		swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID)
 	else:
-		figure_file_path = plot_folder + prod1ID + '_'+ prod2ID + '_boxcompare.png'
+		figure_file_path = os.path.join(plot_folder, prod1ID + '_'+ prod2ID + '_boxcompare.png')
 		swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID,prod2ID)
 
 if __name__ == '__main__':
