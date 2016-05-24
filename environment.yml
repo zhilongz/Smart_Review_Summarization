@@ -9,4 +9,5 @@ dependencies:
   - nltk
   - scipy
   - matplotlib
+  - flask
 #  - amazon_scraper
