@@ -138,6 +138,22 @@ def swnModel(params_filename, wordlist_filename, figure_file_path, prod1ID, prod
         prod2score = get_prod_score(prod2Review,staticPredictor)
         box_plot_compare(prod1score,prod2score,figure_file_path,prod1ID,prod2ID)
 
+    # prepare data for d3 plotting
+    prod1score_d3 = []
+    for ft in prod1score:
+        average_score = np.mean(np.array(prod1score[ft]))
+        prod1score_d3.append({"feature": ft, "score":average_score})
+
+    return prod1score_d3
+
+def main(prod1ID):
+    params_filename = 'lambda_opt_regu2.txt'
+    wordlist_filename = 'wordlist_dict_1.txt'
+
+    plot_folder = settings['sentiment_plot']
+    figure_file_path = os.path.join(plot_folder, prod1ID + '_boxplot.png')
+    return swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID)
+
 if __name__ == '__main__':
     #example run
     params_filename = 'lambda_opt_regu2.txt'
