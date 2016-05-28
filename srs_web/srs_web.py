@@ -35,7 +35,13 @@ def scrape_reviews():
 def showResultWithProductId(product_id): #B00HZE2PYI
 	
 	f_s = swnModel_main(product_id)
-	return render_template('srs_result.html', f_s=json.dumps(f_s))
+	return render_template('srs_result_bar.html', f_s=json.dumps(f_s))
+
+@app.route('/srs_result_box/<product_id>')
+def showBoxResultWithProductId(product_id): #B00HZE2PYI
+	
+	# f_s = swnModel_main(product_id)
+	return render_template('srs_result_box.html')
 
 
 if __name__ == '__main__':
