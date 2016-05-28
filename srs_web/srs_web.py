@@ -2,7 +2,6 @@ from flask import Flask, url_for, request, redirect, render_template, send_file
 from srs.scraper import main as scraper_main
 from srs.scraper import isProductScraped
 from srs.swnModel import main as swnModel_main
-from srs.srs_local import main as srs_local_main
 from srs import settings
 import os
 import json
@@ -24,7 +23,9 @@ def scrape_reviews():
 			print "scraped before for {0}".format(product_id)
 			scrapeFlag = False
 		
-		srs_local_main(product_id, None, scrapeFlag)
+		# scrap data
+		if scrapeFlag:
+			scraper_main(product_id)
 		
 		return product_id
 	else:
