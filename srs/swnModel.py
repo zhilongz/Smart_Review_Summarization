@@ -139,12 +139,15 @@ def swnModel(params_filename, wordlist_filename, figure_file_path, prod1ID, prod
         box_plot_compare(prod1score,prod2score,figure_file_path,prod1ID,prod2ID)
 
     # prepare data for d3 plotting
-    prod1score_d3 = []
+    prod1score_bar = []
     for ft in prod1score:
         average_score = np.mean(np.array(prod1score[ft]))
-        prod1score_d3.append({"feature": ft, "score":average_score})
+        prod1score_bar.append({"feature": ft, "score":average_score})
 
-    return prod1score_d3
+    prod1score_box = []
+    for ft in prod1score:
+        prod1score_box.append([ft, prod1score[ft]])
+    return prod1score_bar, prod1score_box
 
 def main(prod1ID):
     params_filename = 'lambda_opt_regu2.txt'

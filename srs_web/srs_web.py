@@ -34,14 +34,15 @@ def scrape_reviews():
 @app.route('/srs_result/<product_id>')
 def showResultWithProductId(product_id): #B00HZE2PYI
 	
-	f_s = swnModel_main(product_id)
-	return render_template('srs_result_bar.html', f_s=json.dumps(f_s))
+	ft_score, _ = swnModel_main(product_id)
+	return render_template('srs_result_bar.html', ft_score=json.dumps(ft_score))
 
 @app.route('/srs_result_box/<product_id>')
 def showBoxResultWithProductId(product_id): #B00HZE2PYI
 	
-	# f_s = swnModel_main(product_id)
-	return render_template('srs_result_box.html')
+	_, ft_scorelist = swnModel_main(product_id)
+
+	return render_template('srs_result_box.html', ft_scorelist=json.dumps(ft_scorelist))
 
 
 if __name__ == '__main__':
