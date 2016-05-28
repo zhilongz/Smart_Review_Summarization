@@ -1,10 +1,11 @@
 from flask import Flask, url_for, request, redirect, render_template, send_file
 from srs.scraper import main as scraper_main
 from srs.scraper import isProductScraped
+from srs.swnModel import main as swnModel_main
 from srs.srs_local import main as srs_local_main
-from srs.swnModel import swnModel
 from srs import settings
 import os
+import json
 
 app = Flask(__name__)
 
@@ -32,10 +33,8 @@ def scrape_reviews():
 @app.route('/srs_result/<product_id>')
 def showResultWithProductId(product_id): #B00HZE2PYI
 	
-	plot_folder = settings['sentiment_plot']
-	plot_file = os.path.join(plot_folder, product_id + '_boxplot.png')
-	
-	return send_file(plot_file, mimetype='image/png')
+	f_s = swnModel_main(product_id)
+	return render_template('srs_result.html', f_s=json.dumps(f_s))
 
 
 if __name__ == '__main__':
