@@ -10,4 +10,6 @@ dependencies:
   - scipy
   - matplotlib
   - flask
+  - pandas
+  - bokeh
 #  - amazon_scraper
