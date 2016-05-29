@@ -157,16 +157,4 @@ def main(prod1ID):
     figure_file_path = os.path.join(plot_folder, prod1ID + '_boxplot.png')
     return swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID)
 
-if __name__ == '__main__':
-    #example run
-    params_filename = 'lambda_opt_regu2.txt'
-    wordlist_filename = 'wordlist_dict_1.txt'
-    prod1ID = 'B00007F8UQ'
-    prod2ID = 'B00AW2P98E'
-    
-    figure_file_path = 'boxplot.png'
-    swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID)
-
-    figure_file_path = 'boxcompare.png'
-    swnModel(params_filename,wordlist_filename,figure_file_path,prod1ID,prod2ID)
 
