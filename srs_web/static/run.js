@@ -2,7 +2,7 @@
 function renderResult(d,tStatus, jqxhr){
     $("#progress")[0].innerHTML = "Done! Please check your results below.";
     product_id = d;
-    var resultUrl = "/srs_result_box/" + product_id;
+    var resultUrl = "/srs_result_box_bokeh/" + product_id;
 
     $("#resultLink")[0].href = resultUrl;
     $("#resultLink")[0].innerHTML = product_id+" srs result";
