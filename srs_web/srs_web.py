@@ -2,10 +2,13 @@ from flask import Flask, url_for, request, redirect, render_template, send_file
 from srs.scraper import main as scraper_main
 from srs.scraper import isProductScraped
 from srs.swnModel import main as swnModel_main
+from srs.sentiment_plot import sentimentBoxPlot
 from srs import settings
 import os
 import json
 import numpy as np
+
+from bokeh.embed import file_html, components
 
 app = Flask(__name__)
 
@@ -53,6 +56,17 @@ def showBoxResultWithProductId(product_id): #B00HZE2PYI
 
 	return render_template('srs_result_box.html', ft_scorelist=json.dumps(ft_scorelist))
 
+@app.route('/srs_result_box_bokeh/<product_id>')
+def showBokehBoxResultWithProductId(product_id):
+	# generate data for plotting
+	ft_scorelist_dict = swnModel_main(product_id)
+
+	# do plotting
+	p = sentimentBoxPlot(ft_scorelist_dict)
+
+	# create the HTML elements to pass to template
+	figJS,figDiv = components(p)
+	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDiv)
 
 if __name__ == '__main__':
 	app.debug = True
