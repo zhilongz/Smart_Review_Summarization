@@ -6,6 +6,7 @@ import string
 import os
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.snowball import SnowballStemmer
+from database import select_for_product_id
 
 def getSentencesFromReview(reviewContent):
     """
@@ -99,6 +100,13 @@ def loadScraperDataFromFile(file_name):
                 sentences.append(Sentence(content=line))
     return sentences 
 
+def loadScraperDataFromDB(product_id): 
+    query_res = select_for_product_id(product_id)
+    if len(query_res) > 0:
+        return query_res[0]["contents"], query_res[0]["ft_score"], query_res[0]["ft_senIdx"]
+    else:
+        return [], {}, {}
+        
 class Sentence(object):
 
     def __init__(self, content, tokens=None, labeled_aspects='', sentiment=None):
