@@ -1,10 +1,7 @@
 from flask import Flask, url_for, request, redirect, render_template, send_file
-from srs.scraper import main as scraper_main
-from srs.scraper import isProductScraped
-from srs.swnModel import main as swnModel_main
 from srs.sentiment_plot import sentimentBoxPlot
-from srs import settings
-import os
+from srs.srs_local import fill_in_db
+from srs.utilities import loadScraperDataFromDB
 import json
 import numpy as np
 
@@ -22,14 +19,7 @@ def scrape_reviews():
 		product_id = request.form["product_id"]
 		print 'product_id is ' + product_id
 
-		scrapeFlag = True
-		if isProductScraped(product_id):
-			print "scraped before for {0}".format(product_id)
-			scrapeFlag = False
-		
-		# scrap data
-		if scrapeFlag:
-			scraper_main(product_id)
+		fill_in_db(product_id)
 		
 		return product_id
 	else:
@@ -38,31 +28,31 @@ def scrape_reviews():
 @app.route('/srs_result/<product_id>')
 def showResultWithProductId(product_id): #B00HZE2PYI
 	
-	ft_scorelist_dict = swnModel_main(product_id)
-	ft_score = []
-	for ft in ft_scorelist_dict:
-		average_score = np.mean(np.array(ft_scorelist_dict[ft]))
-		ft_score.append({"feature": ft, "score":average_score})
+	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
+	ft_score_ave = []
+	for ft in ft_score_dict:
+		average_score = np.mean(np.array(ft_score_dict[ft]))
+		ft_score_ave.append({"feature": ft, "score":average_score})
 
-	return render_template('srs_result_bar.html', ft_score=json.dumps(ft_score))
+	return render_template('srs_result_bar.html', ft_score_ave=json.dumps(ft_score_ave))
 
 @app.route('/srs_result_box/<product_id>')
 def showBoxResultWithProductId(product_id): #B00HZE2PYI
 	
-	ft_scorelist_dict = swnModel_main(product_id)
+	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
 	ft_scorelist = []
-	for ft in ft_scorelist_dict:
-		ft_scorelist.append([ft, ft_scorelist_dict[ft]])
+	for ft in ft_score_dict:
+		ft_scorelist.append([ft, ft_score_dict[ft]])
 
 	return render_template('srs_result_box.html', ft_scorelist=json.dumps(ft_scorelist))
 
 @app.route('/srs_result_box_bokeh/<product_id>')
 def showBokehBoxResultWithProductId(product_id):
 	# generate data for plotting
-	ft_scorelist_dict = swnModel_main(product_id)
+	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
 
 	# do plotting
-	p = sentimentBoxPlot(ft_scorelist_dict)
+	p = sentimentBoxPlot(ft_score_dict)
 
 	# create the HTML elements to pass to template
 	figJS,figDiv = components(p)

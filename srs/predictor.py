@@ -87,6 +87,24 @@ class StaticPredictor(object):
 		else:
 			return predicted_aspect
 
+	def predict_for_sentences(self, sentences, cp_threshold=0.0, debug=False):
+
+		for sentence in sentences:
+			if debug:
+				sentence.static_aspect = self.predict(sentence)[0]
+			else:
+				sentence.static_aspect = self.predict(sentence)
+
+def loadTrainedStaticPredictor():
+	
+	params_filename = 'lambda_opt_regu2.txt'
+	wordlist_filename = 'wordlist_dict_1.txt'
+	staticPredictor = StaticPredictor()
+	staticPredictor.loadParams(params_filename)
+	staticPredictor.loadWordListDict(wordlist_filename)
+
+	return staticPredictor
+
 def main():
 	staticPredictor = StaticPredictor()
 
