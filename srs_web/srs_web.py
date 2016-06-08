@@ -3,6 +3,7 @@ from srs.scraper import main as scraper_main
 from srs.scraper import isProductScraped
 from srs.swnModel import main as swnModel_main
 from srs.sentiment_plot import sentimentBoxPlot
+from srs.srs_local import fill_in_db
 from srs import settings
 import os
 import json
@@ -22,14 +23,7 @@ def scrape_reviews():
 		product_id = request.form["product_id"]
 		print 'product_id is ' + product_id
 
-		scrapeFlag = True
-		if isProductScraped(product_id):
-			print "scraped before for {0}".format(product_id)
-			scrapeFlag = False
-		
-		# scrap data
-		if scrapeFlag:
-			scraper_main(product_id)
+		fill_in_db(product_id)
 		
 		return product_id
 	else:
