@@ -87,6 +87,14 @@ class StaticPredictor(object):
 		else:
 			return predicted_aspect
 
+	def predict_for_sentences(self, sentences, cp_threshold=0.0, debug=False):
+
+		for sentence in sentences:
+			if debug:
+				sentence.static_aspect = self.predict(sentence)[0]
+			else:
+				sentence.static_aspect = self.predict(sentence)
+
 def main():
 	staticPredictor = StaticPredictor()
 
