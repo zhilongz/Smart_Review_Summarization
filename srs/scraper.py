@@ -101,7 +101,7 @@ class AmazonReviewScraper:
                 start))
         return contents
 
-def main(productID):
+def getAmazomConfidentialKeys():
     conf_file = os.path.join(
                 settings["scraper_data"],
                 "amazon.ini")
@@ -118,13 +118,23 @@ def main(productID):
     except:
         sys.exit("Bad configuration file; exiting.")
 
+    return AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG
+
+def createAmazonScraper():
+    AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG = \
+    getAmazomConfidentialKeys()
+    
     a = AmazonReviewScraper(
         AMAZON_ACCESS_KEY,
         AMAZON_SECRET_KEY,
         AMAZON_ASSOC_TAG,
         debug=False)
+    return a
+
+def main(amazonScraper, productID):
+
     if not has_product_id(productID):
-        contents = a.scrape_reviews(productID)
+        contents = amazonScraper.scrape_reviews(productID)
         return contents
     else:
         print "{0} is already scraped and has reviews stored.".format(productID)
@@ -135,4 +145,5 @@ def main(productID):
 if __name__ == "__main__":
 
     productID = 'B00I8BICB2' # sony a6000 with 686 reviews
-    main(productID)
+    a = createAmazonScraper()   
+    main(a, productID)
