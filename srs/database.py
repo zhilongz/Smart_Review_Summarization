@@ -73,16 +73,20 @@ def insert_for_product_id(product_id, contents, ft_score=None, ft_senIdx=None):
 	product_collection.save(product_document)
 	client.close()
 
-def upsert_contents_for_product_id(product_id, contents):
-	
+def upsert_contents_for_product_id(product_id, contents, ft_score=None, ft_senIdx=None):
+	if ft_score is None:
+		ft_score = {}
+	if ft_senIdx is None:
+		ft_senIdx = {}
+
 	client, db = connect_to_db()
 	product_collection = db.product_collection
 
 	query = {"product_id": product_id}
 	update_field = {
 	"contents": contents,
-	"ft_score": {}, 
-	"ft_senIdx":{}
+	"ft_score": ft_score, 
+	"ft_senIdx":ft_senIdx
 	}
 	product_collection.update(query, {"$set": update_field}, True)
 
