@@ -2,6 +2,7 @@ from flask import Flask, url_for, request, redirect, render_template, send_file
 from srs.sentiment_plot import sentimentBoxPlot
 from srs.srs_local import fill_in_db
 from srs.utilities import loadScraperDataFromDB
+from srs.scraper import createAmazonScraper
 import json
 import numpy as np
 
@@ -18,8 +19,9 @@ def scrape_reviews():
 	if request.method == 'POST':
 		product_id = request.form["product_id"]
 		print 'product_id is ' + product_id
-
-		fill_in_db(product_id)
+		
+		a = createAmazonScraper()
+		fill_in_db(a, product_id)
 		
 		return product_id
 	else:
