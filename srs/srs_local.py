@@ -4,7 +4,7 @@ from srs import settings
 from utilities import loadScraperDataFromDB, Sentence
 from swnModel import get_sentiment_score_for_sentences, get_ftScore_ftSenIdx_dicts
 from sentiment_plot import box_plot
-from database import insert_for_product_id, update_for_product_id
+from database import upsert_contents_for_product_id, update_for_product_id
 import os
 
 def get_ft_dicts_from_contents(contents, staticPredictor):
@@ -32,7 +32,7 @@ def fill_in_db(product_id):
 		get_ft_dicts_from_contents(prod1_contents, staticPredictor)
 		
 		# insert new entry
-		insert_for_product_id(product_id, prod1_contents, \
+		upsert_contents_for_product_id(product_id, prod1_contents, \
 			prod1_ft_score_dict, prod1_ft_senIdx_dict)
 	
 	elif len(prod1_ft_score_dict) == 0 or len(prod1_ft_senIdx_dict) == 0:
