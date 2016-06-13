@@ -12,9 +12,10 @@
 
 <body>
 
-<h1>Smart Review Summarization</h1>
+<header><h1>Smart Review Summarization</h1></header>
 
-<div>
+
+<div id="main_section" style="width:600px; margin:0 auto;">
 	<form name="input_form"
 	      id="input_form"
 	      action=""
@@ -22,14 +23,17 @@
 	      enctype="multipart/form-data"
 	      >
 	    <div class="form-group">
-	        <label for="product_id">Product ID</label>
+	        <label for="product_id">Product ID</label><br>
 	        <input name="product_id"
 	               id="product_id"
 	               type="text"
-	               class="form-control"
+	               size="60"
 	               placeholder="B00HZE2PYI" />
 	    </div>
-	    <input type="submit" value="Summarize" class="btn btn-default"/>
+	    <center>
+		    <input type="submit" id="summarize"  value="Summarize" class="btn btn-default"/>
+		    <input type="submit" id="compare" value="Compare two products" class="btn btn-default"/>
+		</center>
 	</form>
 
 	<div id="progress"></div>
@@ -39,5 +43,8 @@
 </div>
 <script src="static/run.js"></script>
 
+<footer>
+<a href="mailto:srs2016@gmail.com">Contact us</a>
+</footer>
 </body>
 </html>
