@@ -20,7 +20,7 @@ def sentimentBoxPlot(feature_scorelist_dict):
 		spans.append(span)
 
 	TOOLS = "resize,save"
-	p = figure(tools=TOOLS, plot_width=720, plot_height=480, x_range=features)
+	p = figure(tools=TOOLS, plot_width=700, plot_height=460, x_range=features)
 	w = 0.2
 	p.rect(features, mids, w, spans, fill_color="#F2583E", line_color="black")
 	

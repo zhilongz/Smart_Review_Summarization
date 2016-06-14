@@ -4,11 +4,43 @@
 		<title>SRS Result</title>
 		<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.js"></script>
 		<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css">
+		<link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300'
+              rel='stylesheet' type='text/css'></link>
 		{{ figJS|safe }}
+		<style>
+		header {
+		    text-align: center;
+		}
+		h1 {
+		    font-family: 'Roboto Condensed', sans-serif;
+		    font-weight: 300;
+		    font-size: 28pt;
+		}
+		#AspectsPlot {
+			padding-left: 25pt;
+			float:left;
+		}
+		#oneAspectsPlot {
+			padding-top: 25pt;
+			float:right;
+		}
+		#oneAspect_text {
+			padding-top: 5pt;
+			font-family: 'Roboto Condensed', sans-serif;
+		    font-weight: 300;
+		    font-size: 16pt;
+		}
+		</style>
 	</head>
+
 	<body>
-		<div class='bokeh'>
+		<header><h1>Smart Review Summarization</h1></header>
+
+		<div id="AspectsPlot">
 		 {{ figDiv|safe }}
+		</div>
+		<div id="oneAspectPlot">
+			<p id="oneAspect_text">Aspect Details:</p>
 		</div>
 	</body>
 </html>
