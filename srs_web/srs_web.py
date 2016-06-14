@@ -18,10 +18,16 @@ def home():
 def scrape_reviews():
 	if request.method == 'POST':
 		product_id = request.form["product_id"]
-		print 'product_id is ' + product_id
-		
-		a = createAmazonScraper()
-		fill_in_db(a, product_id)
+		product_id2 = request.form["product_id2"]
+		if not product_id2:		
+			print 'product_id is ' + product_id			
+			a = createAmazonScraper()
+			fill_in_db(a, product_id)
+		else:
+			print 'product_id is ' + product_id	+ ' and '+ product_id2
+			a = createAmazonScraper()
+			fill_in_db(a, product_id)
+			fill_in_db(a, product_id2)
 		
 		return product_id
 	else:
