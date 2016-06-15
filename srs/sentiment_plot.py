@@ -1,7 +1,7 @@
 from math import pi
 import pandas as pd
-from bokeh.plotting import figure, show, output_file
-from bokeh.models import ColumnDataSource,OpenURL, TapTool,Select,CustomJS,HoverTool
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -22,22 +22,26 @@ def sentimentBoxPlot(feature_scorelist_dict):
 		spans.append(span)
 		all_score_list.append(scorearray.tolist())
 
-	TOOLS = "resize,save"
-	p = figure(tools=TOOLS, plot_width=700, plot_height=460, x_range=features)
-	w = 0.2
+	TOOLS = "save"
+	p = figure(tools=TOOLS, plot_width=700, plot_height=470, x_range=features, title_text_font_size='16pt',y_axis_label="Sentiment Score")
+	p.yaxis.axis_label_text_font_size = "12pt"
+	p.xaxis.axis_label_text_font_size = "12pt"
+	w = 0.3
 	p_rect=p.rect(features, mids, w, spans, fill_color="#F2583E", line_color="black",hover_color='olive', hover_alpha=1.0)
 	
 	p.title = "Product Review Aspect Summary"
 	p.xaxis.major_label_orientation = pi/4
 	p.grid.grid_line_alpha=0.3
+	p.logo = None
 
-	p2 = figure(tools="tap", title="Aspect Histogram", plot_width=300, plot_height=300)
+	p2 = figure(tools="tap", title="Aspect Histogram", plot_width=400, plot_height=270,title_text_font_size='16pt',y_axis_label='# of sentences',x_axis_label="Sentiment Score")
 	s2=ColumnDataSource(data=dict(top=[], bottom=[], left=[], right=[]))
 	p2.quad(top='top',bottom='bottom',left='left',right='right', source=s2,line_width=2,fill_alpha=0.8,color="#B3AE69")
-
+	p2.xaxis.axis_label_text_font_size = "12pt"
+	p2.yaxis.axis_label_text_font_size = "12pt"
+	p2.logo = None
 
 	Hover_jscode="""
-
 		var score_list = %s
 		//var rect_data=Rects.get('data');
 
