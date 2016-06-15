@@ -38,15 +38,15 @@ def sentimentBoxPlot(feature_scorelist_dict):
 	jscode="""
 		var data = s2.get('data');
 		var rect_data=Rects.get('data');
-		var current_data = cb_data;
-		window.alert(rect_data.x);
-        data['x']=[3,5,7];
+		var current_data = cb_data.index['1d'].indices;
+		var current_object = cb_obj.get('data')
+        data['x']=[current_data[0],5,7];
         data['y']=[5,1,8];
         s2.trigger('change');
 		"""
-	CallBack=CustomJS(args={'s2':s2,'Rects':p_rect.data_source},code=jscode)
-	p.add_tools(TapTool(callback=CallBack, renderers=[p_rect]))
-	p.add_tools(HoverTool(renderers=[p_rect]))
+	Click_CallBack=CustomJS(args={'s2':s2,'Rects':p_rect.data_source},code=jscode)
+	p.add_tools(TapTool(callback=Click_CallBack, renderers=[p_rect]))
+	p.add_tools(HoverTool(renderers=[p_rect],callback=Click_CallBack))
 	return (p,p2)
 
 # function for setting the colors of the box plots pairs
