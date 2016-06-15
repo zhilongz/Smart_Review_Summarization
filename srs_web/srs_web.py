@@ -1,5 +1,5 @@
 from flask import Flask, url_for, request, redirect, render_template, send_file
-from srs.sentiment_plot import sentimentBoxPlot
+from srs.sentiment_plot import sentimentBoxPlot, sentimentBoxPlot_Compare
 from srs.srs_local import fill_in_db
 from srs.utilities import loadScraperDataFromDB
 from srs.scraper import createAmazonScraper
