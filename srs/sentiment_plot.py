@@ -31,21 +31,65 @@ def sentimentBoxPlot(feature_scorelist_dict):
 	p.xaxis.major_label_orientation = pi/4
 	p.grid.grid_line_alpha=0.3
 
-	p2 = figure(tools="tap", title="line", plot_width=300, plot_height=300)
-	s2=ColumnDataSource(data=dict(x=[], y=[]))
-	p2.line('x', 'y', source=s2,line_width=2)
+	p2 = figure(tools="tap", title="Aspect Histogram", plot_width=300, plot_height=300)
+	s2=ColumnDataSource(data=dict(top=[], bottom=[], left=[], right=[]))
+	p2.quad(top='top',bottom='bottom',left='left',right='right', source=s2,line_width=2,fill_alpha=0.8,color="#B3AE69")
 
-	jscode="""
+
 	Hover_jscode="""
-		var data = s2.get('data');
+
 		var score_list = %s
-		var rect_data=Rects.get('data');
+		//var rect_data=Rects.get('data');
+
+		//getting the source data for Fig.2
+		var fig2data = s2.get('data');
+
+		//get current hovering index
 		var current_index = cb_data.index['1d'].indices[0];
-		//var selected_score_list=score_list[current_index]
-		if (typeof current_index != 'undefined'){console.log(score_list[current_index])
-		data['x']=[2,5,7];
-        data['y']=[score_list[current_index][0]*200,1,8];
-        s2.trigger('change');
+
+		//defining linspace function
+		var linspace = function linspace(a,b,n) {
+		    if(typeof n === "undefined") n = Math.max(Math.round(b-a)+1,1);
+		    if(n<2) { return n===1?[a]:[]; }
+		    var i,ret = Array(n);
+		    n--;
+		    for(i=n;i>=0;i--) { ret[i] = (i*b+(n-i)*a)/n; }
+		    return ret;
+		}
+
+		if (typeof current_index != 'undefined'){
+
+			//Making histogram
+			var selected_list=score_list[current_index];
+			var min = Math.min(...selected_list);
+			var max = Math.max(...selected_list);
+			var score_num = selected_list.length;
+			var bin_num = 4;
+			if(score_num<=10){ bin_num = 2;} 
+			else if (10 < score_num && score_num <= 30) { bin_num = 3;}
+			else if (30 <score_num && score_num <= 100) { bin_num = 4;}
+			else if (score_num > 100){bin_num = 5;
+			}
+			var hist = new Array(bin_num).fill(0);
+			var delimiter = linspace (min, max, bin_num+1);
+			for (i = 0; i < score_num; i++){
+				score = selected_list[i];
+				for (j = 0; j < bin_num; j++){
+					if(delimiter[j] <= score && score < delimiter[j+1]){
+						hist[j]++;
+					}
+				}
+			}
+
+			//Defining the drawing parameters for Fig2
+			fig2data['bottom'] = new Array(bin_num).fill(0);
+			fig2data['top'] = hist;
+			fig2data['left']= delimiter.slice(0,bin_num);
+			fig2data['right']= delimiter.slice(1,bin_num+1)
+
+
+			console.log(fig2data);
+	        s2.trigger('change');
 		}
         
 		""" % all_score_list
