@@ -1,6 +1,7 @@
 from math import pi
 import pandas as pd
 from bokeh.plotting import figure, show, output_file
+from bokeh.models import ColumnDataSource,OpenURL, TapTool,Select,CustomJS,HoverTool
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -9,6 +10,7 @@ def sentimentBoxPlot(feature_scorelist_dict):
 	features = []
 	mids = []
 	spans = []
+	all_score_list = []
 
 	for feature, scorelist in feature_scorelist_dict.items():
 		features.append(feature)
@@ -18,16 +20,34 @@ def sentimentBoxPlot(feature_scorelist_dict):
 
 		mids.append(mean)
 		spans.append(span)
+		all_score_list.append(scorearray)
 
 	TOOLS = "resize,save"
 	p = figure(tools=TOOLS, plot_width=700, plot_height=460, x_range=features)
 	w = 0.2
-	p.rect(features, mids, w, spans, fill_color="#F2583E", line_color="black")
+	p_rect=p.rect(features, mids, w, spans, fill_color="#F2583E", line_color="black",hover_color='olive', hover_alpha=1.0)
 	
 	p.title = "Product Review Aspect Summary"
 	p.xaxis.major_label_orientation = pi/4
 	p.grid.grid_line_alpha=0.3
-	return p
+
+	p2 = figure(tools="tap", title="line", plot_width=300, plot_height=300)
+	s2=ColumnDataSource(data=dict(x=[], y=[]))
+	p2.line('x', 'y', source=s2,line_width=2)
+
+	jscode="""
+		var data = s2.get('data');
+		var rect_data=Rects.get('data');
+		var current_data = cb_data;
+		window.alert(rect_data.x);
+        data['x']=[3,5,7];
+        data['y']=[5,1,8];
+        s2.trigger('change');
+		"""
+	CallBack=CustomJS(args={'s2':s2,'Rects':p_rect.data_source},code=jscode)
+	p.add_tools(TapTool(callback=CallBack, renderers=[p_rect]))
+	p.add_tools(HoverTool(renderers=[p_rect]))
+	return (p,p2)
 
 # function for setting the colors of the box plots pairs
 def set_box_color(bp, color):

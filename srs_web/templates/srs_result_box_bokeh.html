@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css">
 		<link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300'
               rel='stylesheet' type='text/css'></link>
-		{{ figJS|safe }}
+		{{ figJS |safe }}
 		<style>
 		header {
 		    text-align: center;
@@ -37,10 +37,11 @@
 		<header><h1>Smart Review Summarization</h1></header>
 
 		<div id="AspectsPlot">
-		 {{ figDiv|safe }}
+			{{ figDiv|safe }}
 		</div>
 		<div id="oneAspectPlot">
 			<p id="oneAspect_text">Aspect Details:</p>
+			{{ figDiv2|safe }}
 		</div>
 	</body>
 </html>

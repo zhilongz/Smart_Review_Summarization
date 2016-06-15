@@ -60,11 +60,11 @@ def showBokehBoxResultWithProductId(product_id):
 	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
 
 	# do plotting
-	p = sentimentBoxPlot(ft_score_dict)
+	plots = sentimentBoxPlot(ft_score_dict)
 
 	# create the HTML elements to pass to template
-	figJS,figDiv = components(p)
-	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDiv)
+	figJS,figDivs = components(plots)
+	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
 
 if __name__ == '__main__':
 	app.debug = True
