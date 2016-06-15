@@ -20,7 +20,7 @@ def sentimentBoxPlot(feature_scorelist_dict):
 
 		mids.append(mean)
 		spans.append(span)
-		all_score_list.append(scorearray)
+		all_score_list.append(scorearray.tolist())
 
 	TOOLS = "resize,save"
 	p = figure(tools=TOOLS, plot_width=700, plot_height=460, x_range=features)
@@ -36,17 +36,21 @@ def sentimentBoxPlot(feature_scorelist_dict):
 	p2.line('x', 'y', source=s2,line_width=2)
 
 	jscode="""
+	Hover_jscode="""
 		var data = s2.get('data');
+		var score_list = %s
 		var rect_data=Rects.get('data');
-		var current_data = cb_data.index['1d'].indices;
-		var current_object = cb_obj.get('data')
-        data['x']=[current_data[0],5,7];
-        data['y']=[5,1,8];
+		var current_index = cb_data.index['1d'].indices[0];
+		//var selected_score_list=score_list[current_index]
+		if (typeof current_index != 'undefined'){console.log(score_list[current_index])
+		data['x']=[2,5,7];
+        data['y']=[score_list[current_index][0]*200,1,8];
         s2.trigger('change');
-		"""
-	Click_CallBack=CustomJS(args={'s2':s2,'Rects':p_rect.data_source},code=jscode)
-	p.add_tools(TapTool(callback=Click_CallBack, renderers=[p_rect]))
-	p.add_tools(HoverTool(renderers=[p_rect],callback=Click_CallBack))
+		}
+        
+		""" % all_score_list
+	Hover_CallBack=CustomJS(args={'s2':s2,'Rects':p_rect.data_source},code=Hover_jscode)
+	p.add_tools(HoverTool(renderers=[p_rect],callback=Hover_CallBack,tooltips=None))
 	return (p,p2)
 
 # function for setting the colors of the box plots pairs
