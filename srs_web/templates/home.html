@@ -9,35 +9,58 @@
         <script src="http://code.jquery.com/jquery-2.2.0.min.js" ></script>
         <link rel="stylesheet" href="static/default.css">
 </head>
-
 <body>
 
-<h1>Smart Review Summarization</h1>
+<header><h1>Smart Review Summarization</h1></header>
 
-<div>
+
+<div id="main_section" style="width:600px; margin:0 auto;">
 	<form name="input_form"
 	      id="input_form"
 	      action=""
 	      method="POST"
 	      enctype="multipart/form-data"
 	      >
-	    <div class="form-group">
-	        <label for="product_id">Product ID</label>
-	        <input name="product_id"
-	               id="product_id"
-	               type="text"
-	               class="form-control"
-	               placeholder="B00HZE2PYI" />
-	    </div>
-	    <input type="submit" value="Summarize" class="btn btn-default"/>
+
+	    <div class="form-group" id="input1">
+	        <label for="product_id">&nbsp Product ID:</label><br>
+		    <center>
+		        <input name="product_id"
+		               id="product_id"
+		               type="text"
+		               size="58"
+		               placeholder="B00HZE2PYI" />
+		               &nbsp
+	           	<button id="addInput2"> + </button>
+   			</center>
+	    </div> 
+	    <div class="form-group" id="input2" style="display:none;">
+	        <label for="product_id">&nbsp Product 2 ID:</label><br>
+		    <center>
+		        <input name="product_id2"
+		               id="product_id2"
+		               type="text"
+		               size="58"
+		               placeholder="B00HZE2PYI" />
+		               &nbsp
+	           	<button id="hideInput2"> - </button>
+   			</center>
+	    </div> 
+
+	    <center>
+	    	<input type="submit" name="Summarize" id="Summarize"  value="Summarize" class="btn btn-default"/>
+		</center>
 	</form>
+	
 
 	<div id="progress"></div>
-        <span>Result</span>
     <div id="result"><a id="resultLink" href=""></a></div>
 
 </div>
 <script src="static/run.js"></script>
 
+<footer>
+<a href="mailto:srs2016@gmail.com">Contact us</a>
+</footer>
 </body>
 </html>

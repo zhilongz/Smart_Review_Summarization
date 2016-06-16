@@ -1,5 +1,5 @@
 from flask import Flask, url_for, request, redirect, render_template, send_file
-from srs.sentiment_plot import sentimentBoxPlot
+from srs.sentiment_plot import sentimentBoxPlot, sentimentBoxPlot_Compare
 from srs.srs_local import fill_in_db
 from srs.utilities import loadScraperDataFromDB
 from srs.scraper import createAmazonScraper
@@ -18,10 +18,16 @@ def home():
 def scrape_reviews():
 	if request.method == 'POST':
 		product_id = request.form["product_id"]
-		print 'product_id is ' + product_id
-		
-		a = createAmazonScraper()
-		fill_in_db(a, product_id)
+		product_id2 = request.form["product_id2"]
+		if not product_id2:		
+			print 'product_id is ' + product_id			
+			a = createAmazonScraper()
+			fill_in_db(a, product_id)
+		else:
+			print 'product_id is ' + product_id	+ ' and '+ product_id2
+			a = createAmazonScraper()
+			fill_in_db(a, product_id)
+			fill_in_db(a, product_id2)
 		
 		return product_id
 	else:
@@ -54,11 +60,11 @@ def showBokehBoxResultWithProductId(product_id):
 	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
 
 	# do plotting
-	p = sentimentBoxPlot(ft_score_dict)
+	plots = sentimentBoxPlot(ft_score_dict)
 
 	# create the HTML elements to pass to template
-	figJS,figDiv = components(p)
-	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDiv)
+	figJS,figDivs = components(plots)
+	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
 
 if __name__ == '__main__':
 	app.debug = True
