@@ -39,16 +39,18 @@ class StaticPredictor(object):
 		self.wordlist_dict = loadWordListDict(wordlist_dict_path)
 		self.staticAspectList = sorted(self.wordlist_dict.keys())
 
-	def train(self, wordlist_filename, lamda_opt_filename):
+	def train(self, wordlist_filename, lamda_opt_filename,training_set=None):
 		# load wordlist_dict and static_aspect_list
 		self.loadWordListDict(wordlist_filename)
 		
-		# load training data
-		static_training_data_dir = settings["static_training_data"]
-		training_set = loadUsefulTrainingData(static_training_data_dir)
+		if training_set is None:
+			# load training data
+			static_training_data_dir = settings["static_training_data"]
+			sentences = loadUsefulTrainingData(static_training_data_dir)
+			training_set = sentences[:500]
 
 		lambda_len = len(self.wordlist_dict)*len(self.staticAspectList)
-		res = train(self.wordlist_dict, self.staticAspectList, training_set[:500], lambda_len)
+		res = train(self.wordlist_dict, self.staticAspectList, training_set, lambda_len)
 
 		self.params = res.x
 
