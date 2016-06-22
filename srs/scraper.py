@@ -131,6 +131,55 @@ def createAmazonScraper():
         debug=False)
     return a
 
+def scrape_reviews_hard(productID):
+    '''
+    This method scraps directly from website and does not need userID or the AmazonScrape object
+    However, it can only scrape the 5 top ranked review. 
+    '''
+    from lxml import html
+    import requests
+    from time import sleep
+    from fake_useragent import UserAgent
+    import random
+    
+    url = "http://www.amazon.com/dp/" + productID
+    print "Processing: " + url
+    ua = UserAgent()
+    headers = {
+        # 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+        'User-Agent': ua}
+        # get user agent: http://www.whoishostingthis.com/tools/user-agent/ 
+        # or generate random one: https://pypi.python.org/pypi/fake-useragent
+    page = requests.get(url, headers=headers)
+    while True:
+        sleep(int(random.random()*2+1)) # this is important not to be identified as Amazon
+        try:
+            doc = html.fromstring(page.content)
+            XPATH_NAME = '//h1[@id="title"]//text()'
+            XPATH_RATINGS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a/i/span//text()'
+            XPATH_REVIEWS_TITLE = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a[2]//text()'
+            XPATH_REVIEWS_BODY = '//div[contains(@id, "revData-dpReviewsMostHelpfulAUI")]/div//text()'
+
+            RAW_NAME = doc.xpath(XPATH_NAME)
+            RAW_RATINGS = doc.xpath(XPATH_RATINGS)
+            RAW_REVIEWS_TITLE = doc.xpath(XPATH_REVIEWS_TITLE)
+            RAW_REVIEWS_BODY = doc.xpath(XPATH_REVIEWS_BODY)
+
+            NAME = ' '.join(''.join(RAW_NAME).split()) if RAW_NAME else None
+            RATINGS = ' , '.join(RAW_RATINGS).strip() if RAW_RATINGS else None
+            REVIEWS_TITLE = ' , '.join(RAW_REVIEWS_TITLE).strip() if RAW_REVIEWS_TITLE else None
+            REVIEWS_BODY = '. '.join(RAW_REVIEWS_BODY).strip() if RAW_REVIEWS_BODY else None
+            
+            reviews_text  = REVIEWS_BODY.encode('utf-8')
+            sentences = getSentencesFromReview(reviews_text.decode('utf-8'))
+
+            return sentences
+
+        except Exception as e:
+            print e
+
+
+
 def main(amazonScraper, productID):
 
     if not has_product_id(productID):
@@ -144,6 +193,17 @@ def main(amazonScraper, productID):
 
 if __name__ == "__main__":
 
-    productID = 'B00I8BICB2' # sony a6000 with 686 reviews
+    productID = 'B00C7NX884' # B00I8BICB2 sony a6000 with 686 reviews,B00T85PH2Y
     a = createAmazonScraper()   
-    main(a, productID)
+    content = main(a,productID)
+    # sentences = scrape_reviews_hard(productID)
+    # print sentences
+
+
+    # p = a.amzn.lookup(ItemId=productID)
+    # rs = p.reviews()
+    # for r in rs.full_reviews():
+    #     print r.text
+
+    # content = main(a, productID)
+    # print content

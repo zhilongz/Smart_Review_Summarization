@@ -1,4 +1,4 @@
-from scraper import main as scraper_main, createAmazonScraper
+from scraper import main as scraper_main, createAmazonScraper,scrape_reviews_hard
 from predictor import StaticPredictor, loadTrainedStaticPredictor
 from srs import settings
 from utilities import loadScraperDataFromDB, Sentence
@@ -17,15 +17,20 @@ def get_ft_dicts_from_contents(contents, staticPredictor):
 	return get_ftScore_ftSenIdx_dicts(sentences)
 	
 
-def fill_in_db(amazonScraper, product_id):
+def fill_in_db(product_id):
 	
 	# fetch product info from db 
 	prod1_contents, prod1_ft_score_dict, prod1_ft_senIdx_dict = loadScraperDataFromDB(product_id)
 
 	if len(prod1_contents) == 0: # not in db yet
 		# scrape contents
-		prod1_contents = scraper_main(amazonScraper, product_id)
-		
+		try: 
+			amazonScraper = createAmazonScraper()
+			prod1_contents = scraper_main(amazonScraper, product_id)
+		except: 
+			prod1_contents = scrape_reviews_hard(product_id)
+			print 'Amazon API failed. Scrape the hard way!'
+
 		# classify, sentiment score
 		staticPredictor = loadTrainedStaticPredictor()
 		prod1_ft_score_dict, prod1_ft_senIdx_dict = \
@@ -60,10 +65,9 @@ def plot(product_id):
 	box_plot(prod1_ft_score_dict, figure_file_path, product_id)
 
 def main(product_id):
-	a = createAmazonScraper()
-	fill_in_db(a, product_id)
+	fill_in_db(product_id)
 	plot(product_id)
 
 if __name__ == '__main__':
-	product_id = 'B00HZE2PYI'
+	product_id = 'B00HV6KL6Y'
 	main(product_id)
