@@ -91,9 +91,9 @@ class StaticPredictor(object):
 
 		for sentence in sentences:
 			if debug:
-				sentence.static_aspect = self.predict(sentence)[0]
+				sentence.static_aspect = self.predict(sentence, cp_threshold=cp_threshold)[0]
 			else:
-				sentence.static_aspect = self.predict(sentence)
+				sentence.static_aspect = self.predict(sentence, cp_threshold=cp_threshold)
 
 def loadTrainedStaticPredictor():
 	
