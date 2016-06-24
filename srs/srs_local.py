@@ -12,7 +12,7 @@ def get_ft_dicts_from_contents(contents, staticPredictor):
 	for cont in contents:
 		sentences.append(Sentence(content=cont))
 
-	staticPredictor.predict_for_sentences(sentences)	
+	staticPredictor.predict_for_sentences(sentences, cp_threshold=0.5)	
 	get_sentiment_score_for_sentences(sentences)
 	return get_ftScore_ftSenIdx_dicts(sentences)
 	
