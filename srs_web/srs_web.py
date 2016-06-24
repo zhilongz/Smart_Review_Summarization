@@ -23,13 +23,14 @@ def scrape_reviews():
 			print 'product_id is ' + product_id			
 			a = createAmazonScraper()
 			fill_in_db(a, product_id)
+			return str(product_id)
 		else:
-			print 'product_id is ' + product_id	+ ' and '+ product_id2
+			print 'product_id are ' + product_id	+ ' and '+ product_id2
 			a = createAmazonScraper()
 			fill_in_db(a, product_id)
 			fill_in_db(a, product_id2)
-		
-		return product_id
+			return str(product_id) + "&" + str(product_id2)
+
 	else:
 		return render_template('home.html')
 
@@ -57,10 +58,15 @@ def showBoxResultWithProductId(product_id): #B00HZE2PYI
 @app.route('/srs_result_box_bokeh/<product_id>')
 def showBokehBoxResultWithProductId(product_id):
 	# generate data for plotting
+
+@app.route('/srs_result_box_bokeh/<product_id>&<product_id2>')
+def showBokehBoxResultWithTwoProductIds(product_id, product_id2):
+	# generate data for plotting
 	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
+	_, ft_score_dict2, _ = loadScraperDataFromDB(product_id2)
 
 	# do plotting
-	plots = sentimentBoxPlot(ft_score_dict)
+	plots = sentimentBoxPlot_Compare(ft_score_dict, ft_score_dict2)
 
 	# create the HTML elements to pass to template
 	figJS,figDivs = components(plots)
