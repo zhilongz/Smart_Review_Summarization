@@ -58,6 +58,14 @@ def showBoxResultWithProductId(product_id): #B00HZE2PYI
 @app.route('/srs_result_box_bokeh/<product_id>')
 def showBokehBoxResultWithProductId(product_id):
 	# generate data for plotting
+	contents, ft_score_dict, ft_senIdx_dict = loadScraperDataFromDB(product_id)
+
+	# do plotting
+	plots = sentimentBoxPlot(contents, ft_score_dict, ft_senIdx_dict)
+
+	# create the HTML elements to pass to template
+	figJS,figDivs = components(plots)
+	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
 
 @app.route('/srs_result_box_bokeh/<product_id>&<product_id2>')
 def showBokehBoxResultWithTwoProductIds(product_id, product_id2):
