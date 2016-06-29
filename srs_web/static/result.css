@@ -1,0 +1,53 @@
+h3, p {
+  padding: 0px;
+  margin: 0px;
+}
+h1 {
+    margin: 20px auto;
+    text-align: center;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 300;
+    font-size: 25px;
+}
+#AspectsPlot {
+	padding-left: 40px;
+	float:left;
+  width: 50%;
+}
+#sidebar {
+  padding-top: 40px;
+  padding-left: 50px;
+  width: 40%;
+	float:left;
+}
+
+#histPlotTitle p {
+  display:inline-block;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 20px;
+  border-bottom: 1px solid black;
+  text-transform: uppercase;
+}
+
+#oneAspectsPlot {
+  float:left;
+}
+
+#sample_reviews h3{
+  
+  float:left;
+	font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+  display:inline-block;
+  border-bottom: 1px solid black;
+}
+
+#sample_reviews p{
+  padding-top: 10px;
+  width: 100%;
+  float:left;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+}
