@@ -17,44 +17,42 @@ function linspace(a,b,n) {
     return ret;
 }
 
-function fillHistData(cb_data, fig2data, features, all_score_list) {
+function fillHistData(cb_data, histPlot_data, features, hist_data) {
 
     var current_index = cb_data.index['1d'].indices[0];
 
     if (typeof current_index != 'undefined'){
 
-        //fill s2 with data needed for histogram
-        var selected_list=all_score_list[current_index];
-        var min = Math.min(...selected_list);
-        var max = Math.max(...selected_list);
-        var score_num = selected_list.length;
-        var bin_num = 4;
-        if(score_num<=10){ bin_num = 2;} 
-        else if (10 < score_num && score_num <= 30) { bin_num = 3;}
-        else if (30 <score_num && score_num <= 100) { bin_num = 4;}
-        else if (score_num > 100){bin_num = 5;
-        }
-        var hist = new Array(bin_num).fill(0);
-        var delimiter = linspace (min, max, bin_num+1);
-        for (i = 0; i < score_num; i++){
-            score = selected_list[i];
-            for (j = 0; j < bin_num; j++){
-                if(delimiter[j] <= score && score < delimiter[j+1]){
-                    hist[j]++;
-                }
-            }
-        }
+        histTop = hist_data['tops'][current_index];
+        histLeft = hist_data['lefts'][current_index];
+        histRight = hist_data['rights'][current_index];
+        feature = features[current_index];
+
+        bin_num = histTop.length;
         //Defining the drawing parameters for Fig2
-        fig2data['bottom'] = new Array(bin_num).fill(0);
-        fig2data['top'] = hist;
-        fig2data['left']= delimiter.slice(0,bin_num);
-        fig2data['right']= delimiter.slice(1,bin_num+1);
-        
-        fig2data['feature'] = features[current_index];
-        console.log(fig2data['feature']);    
-        
+        histPlot_data['bottom'] = new Array(bin_num).fill(0);
+        histPlot_data['top'] = histTop;
+        histPlot_data['left']= histLeft;
+        histPlot_data['right']= histRight;
+        histPlot_data['feature'] = feature;
+
+        console.log(histPlot_data['feature']);
+        $("#histPlotTitle p").text(histPlot_data['feature']);           
         }
     
+}
+
+function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
+    var barIdx = cb_data.index['1d'].indices[0];
+
+    if (typeof barIdx != 'undefined'){
+        var example_sen = sampleSentences_dict[feature][barIdx];
+        console.log(example_sen[0]);
+        $("#sample_sen1").text(example_sen[0]);
+    }
+    else {
+        $("#sample_sen1").text("");
+    }
 }
 
 $("#input_form").submit(function(e){    
