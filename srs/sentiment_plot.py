@@ -90,9 +90,13 @@ def prepareDataForHistPlotAndSampleSentences(
 def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color="#99d8c9",
 	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+	
+	feature_num = len(features)
 
+	color_list = [fill_color]*feature_num
 	# plot rectPlot
-	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, x_range=features,y_axis_label="Sentiment Score")
+	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, 
+		x_range=sorted(list(set(features))),y_axis_label="Sentiment Score")
 	rectPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.major_label_orientation = major_label_orientation
@@ -100,7 +104,36 @@ def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color=
 	rectPlot.logo = None
 	rectPlot.toolbar_location = None
 
-	rectPlot_rect=rectPlot.rect(features, mids, w, spans, fill_color=fill_color, line_color=fill_color,hover_color=hover_color, hover_alpha=1.0)
+	rectPlot_rect=rectPlot.rect(features, mids, w, spans, color=color_list,hover_color=hover_color, hover_alpha=1.0)
+
+	return rectPlot, rectPlot_rect
+
+def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.3,
+ 	fill_color="#2ca25f", hover_color="#99d8c9",
+	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
+	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+	
+	# plot rectPlot
+	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, 
+		x_range=sorted(list(set(features1+features2))),y_axis_label="Sentiment Score")
+	rectPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
+	rectPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
+	rectPlot.xaxis.major_label_orientation = major_label_orientation
+	rectPlot.grid.grid_line_alpha=grid_line_alpha
+	rectPlot.logo = None
+	rectPlot.toolbar_location = None
+
+	color_list1 = [fill_color]*len(features1)
+	color_list2 = ['#8856a7']*len(features2)
+
+	rectPlot.rect(legend = "Product 1", color = fill_color)
+	rectPlot.rect(legend = "Product 2", color = '#8856a7')
+
+	rectPlot_rect=rectPlot.rect(features1, mids1, w, spans1, 
+		color=color_list1,hover_color=hover_color, hover_alpha=1.0)
+
+	rectPlot_rect=rectPlot.rect(features2, mids2, w, spans2, 
+		color=color_list2,hover_color=hover_color, hover_alpha=1.0)
 
 	return rectPlot, rectPlot_rect
 
@@ -115,6 +148,26 @@ def getHistPlot(histPlot_cds, color="#99d8c9",
 
 	# initialize plot
 	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', source=histPlot_cds,line_width=2,fill_alpha=0.8,color=color)
+
+	return histPlot, histPlot_quad
+
+def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#99d8c9",color2="#9e9ac8",
+	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+
+	histPlot = figure(tools="", plot_width=400, plot_height=250,
+		y_axis_label='Comments',x_axis_label="Sentiment Score")
+	
+	histPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
+	histPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
+	histPlot.logo = None
+	histPlot.toolbar_location = None
+
+	# initialize plot
+	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+		source=histPlot_cds1,line_width=2,fill_alpha=0.8,color=color1)
+
+	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+		source=histPlot_cds2,line_width=2,fill_alpha=0.8,color=color2)
 
 	return histPlot, histPlot_quad
 
@@ -176,118 +229,61 @@ def sentimentBoxPlot(contents, feature_scorelist_dict, feature_senIdxlist_dict):
 
 	return (rectPlot,histPlot)
 
-def sentimentBoxPlot_Compare(feature_scorelist_dict,feature_scorelist_dict2):
+def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxlist_dict1, 
+	contents2, feature_scorelist_dict2, feature_senIdxlist_dict2):
 
-	features = []
-	mids = []
-	spans = []
-	all_score_list = []
-	color_list = []
-	color1 = "#F2583E"
-	color2 = "#205fDf"
-	color_hover = "olive"
+	# get data for rectPlot
+	features1 = sorted(feature_scorelist_dict1.keys())
+	mids1, spans1 = prepareDataForRectPlot(feature_scorelist_dict1, sort=True)
+	features2 = sorted(feature_scorelist_dict2.keys())
+	mids2, spans2 = prepareDataForRectPlot(feature_scorelist_dict2, sort=True)
 
-	#Combining the two dictionaries into one list:
-	for feature, scorelist in feature_scorelist_dict.items():
-		if feature in feature_scorelist_dict2:			
-			scorelist2 = feature_scorelist_dict2[feature]	
-			feature2 = feature
-			features = features + [feature,feature2]
-			color_list = color_list +[color1, color2]
+	# get data for histPlot and sample reviews
+	hist_cds1, sampleSentences_cds1 = prepareDataForHistPlotAndSampleSentences(
+	feature_scorelist_dict1, feature_senIdxlist_dict1, contents1, sort=True)
+	hist_cds2, sampleSentences_cds2 = prepareDataForHistPlotAndSampleSentences(
+	feature_scorelist_dict2, feature_senIdxlist_dict2, contents2, sort=True)
 
-			scorearray = np.array(scorelist)
-			mean = np.mean(scorearray)
-			span = np.percentile(scorearray, 75) - np.percentile(scorearray, 25)
-			scorearray2 = np.array(scorelist2)
-			mean2 = np.mean(scorearray2)
-			span2 = np.percentile(scorearray2, 75) - np.percentile(scorearray2, 25)
+	# plot rectPlot
+	features = features1 + features2
+	mids = mids1 + mids2
+	spans = spans1 + spans2
+	rectPlot, rectPlot_rect = getRectPlot_compare(features1, mids1, spans1, 
+		features2, mids2, spans2)
 
-			mids = mids + [mean, mean2]
-			spans = spans + [span, span2]
-			all_score_list.append(scorelist)
-			all_score_list.append(scorelist2)
+	# plot histPlot
+	histPlot_cds1 = getInitialHistPlotData(hist_cds1)
+	histPlot_cds2 = getInitialHistPlotData(hist_cds2)
+	histPlot, histPlot_quad = getHistPlot_compare(histPlot_cds1, histPlot_cds2)
 
-
-	TOOLS = "save"
-	p = figure(tools=TOOLS, plot_width=700, plot_height=470, x_range=features, title_text_font_size='16pt',y_axis_label="Sentiment Score")
-	p.yaxis.axis_label_text_font_size = "12pt"
-	p.xaxis.axis_label_text_font_size = "12pt"
-	w = 0.3
-	p_rect=p.rect(features, mids, w, spans, color = color_list, line_color="black",hover_color=color_hover, hover_alpha=1.0)
-	
-	p.title = "Product Review Aspect Summary"
-	p.xaxis.major_label_orientation = pi/4
-	p.grid.grid_line_alpha=0.3
-	p.logo = None
-	p.rect(legend = "Product 1", color = color1)
-	p.rect(legend = "Product 2", color = color2)
-
-	p2 = figure(tools="save,tap", title="Aspect Histogram", plot_width=400, plot_height=270,title_text_font_size='16pt',y_axis_label='# of sentences',x_axis_label="Sentiment Score")
-	s2=ColumnDataSource(data=dict(top=[], bottom=[], left=[], right=[]))
-	p2.quad(top='top',bottom='bottom',left='left',right='right', source=s2,line_width=2,fill_alpha=0.8,color=color_hover)
-	p2.xaxis.axis_label_text_font_size = "12pt"
-	p2.yaxis.axis_label_text_font_size = "12pt"
-	p2.logo = None
-
-	Hover_jscode="""
-		var score_list = %s
-		//var rect_data=Rects.get('data');
-
-		//getting the source data for Fig.2
-		var fig2data = s2.get('data');
+	# add interaction between rectPlot and histPlot
+	hoverJS="""
+		var histPlot_data = histPlot_cds.get('data');
+		var features = hist_cds.get('data')['features'];
+		var hist_data = hist_cds.get('data');
 
 		//get current hovering index
-		var current_index = cb_data.index['1d'].indices[0];
-
-		//defining linspace function
-		var linspace = function linspace(a,b,n) {
-		    if(typeof n === "undefined") n = Math.max(Math.round(b-a)+1,1);
-		    if(n<2) { return n===1?[a]:[]; }
-		    var i,ret = Array(n);
-		    n--;
-		    for(i=n;i>=0;i--) { ret[i] = (i*b+(n-i)*a)/n; }
-		    return ret;
-		}
-
-		if (typeof current_index != 'undefined'){
-
-			//Making histogram
-			var selected_list=score_list[current_index];
-			var min = Math.min(...selected_list);
-			var max = Math.max(...selected_list);
-			var score_num = selected_list.length;
-			var bin_num = 4;
-			if(score_num<=10){ bin_num = 2;} 
-			else if (10 < score_num && score_num <= 30) { bin_num = 3;}
-			else if (30 <score_num && score_num <= 100) { bin_num = 4;}
-			else if (score_num > 100){bin_num = 5;
-			}
-			var hist = new Array(bin_num).fill(0);
-			var delimiter = linspace (min, max, bin_num+1);
-			for (i = 0; i < score_num; i++){
-				score = selected_list[i];
-				for (j = 0; j < bin_num; j++){
-					if(delimiter[j] <= score && score < delimiter[j+1]){
-						hist[j]++;
-					}
-				}
-			}
-
-			//Defining the drawing parameters for Fig2
-			fig2data['bottom'] = new Array(bin_num).fill(0);
-			fig2data['top'] = hist;
-			fig2data['left']= delimiter.slice(0,bin_num);
-			fig2data['right']= delimiter.slice(1,bin_num+1)
-
-
-			console.log(fig2data);
-	        s2.trigger('change');
-		}
+		fillHistData(cb_data, histPlot_data, features, hist_data);		
+		histPlot_cds.trigger('change');
         
-		""" % all_score_list
-	Hover_CallBack=CustomJS(args={'s2':s2,'Rects':p_rect.data_source},code=Hover_jscode)
-	p.add_tools(HoverTool(renderers=[p_rect],callback=Hover_CallBack,tooltips=None))
-	return (p,p2)
+		"""
+
+	hoverCallBack=CustomJS(args={'histPlot_cds':histPlot_cds1, 'hist_cds':hist_cds1},code=hoverJS)
+	rectPlot.add_tools(HoverTool(renderers=[rectPlot_rect],callback=hoverCallBack,tooltips=None))
+
+	# add interaction between histPlot and sample reviews
+	hoverJS2="""
+		var sampleSentences_dict = sampleSentences_cds.get('data');
+		
+		var feature = histPlot_cds.get('data')['feature'];
+		fillSampleReviews(cb_data, sampleSentences_dict, feature);
+        
+		""" 
+
+	hoverCallBack2=CustomJS(args={'sampleSentences_cds':sampleSentences_cds1, 'histPlot_cds': histPlot_cds1}, code=hoverJS2)
+	histPlot.add_tools(HoverTool(renderers=[histPlot_quad],callback=hoverCallBack2,tooltips=None))
+
+	return (rectPlot,histPlot)
 
 # function for setting the colors of the box plots pairs
 def set_box_color(bp, color):

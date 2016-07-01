@@ -70,11 +70,12 @@ def showBokehBoxResultWithProductId(product_id):
 @app.route('/srs_result_box_bokeh/<product_id>&<product_id2>')
 def showBokehBoxResultWithTwoProductIds(product_id, product_id2):
 	# generate data for plotting
-	_, ft_score_dict, _ = loadScraperDataFromDB(product_id)
-	_, ft_score_dict2, _ = loadScraperDataFromDB(product_id2)
+	contents1, ft_score_dict1, ft_senIdx_dict1 = loadScraperDataFromDB(product_id)
+	contents2, ft_score_dict2, ft_senIdx_dict2 = loadScraperDataFromDB(product_id2)
 
 	# do plotting
-	plots = sentimentBoxPlot_Compare(ft_score_dict, ft_score_dict2)
+	plots = sentimentBoxPlot_Compare(contents1, ft_score_dict1, ft_senIdx_dict1, 
+		contents2, ft_score_dict2, ft_senIdx_dict2)
 
 	# create the HTML elements to pass to template
 	figJS,figDivs = components(plots)
