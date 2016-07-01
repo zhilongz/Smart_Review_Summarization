@@ -90,9 +90,13 @@ def prepareDataForHistPlotAndSampleSentences(
 def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color="#99d8c9",
 	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+	
+	feature_num = len(features)
 
+	color_list = [fill_color]*feature_num
 	# plot rectPlot
-	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, x_range=features,y_axis_label="Sentiment Score")
+	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, 
+		x_range=sorted(list(set(features))),y_axis_label="Sentiment Score")
 	rectPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.major_label_orientation = major_label_orientation
@@ -100,7 +104,10 @@ def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color=
 	rectPlot.logo = None
 	rectPlot.toolbar_location = None
 
-	rectPlot_rect=rectPlot.rect(features, mids, w, spans, fill_color=fill_color, line_color=fill_color,hover_color=hover_color, hover_alpha=1.0)
+	rectPlot_rect=rectPlot.rect(features, mids, w, spans, color=color_list,hover_color=hover_color, hover_alpha=1.0)
+
+	return rectPlot, rectPlot_rect
+
 
 	return rectPlot, rectPlot_rect
 
