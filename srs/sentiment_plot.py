@@ -108,6 +108,32 @@ def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color=
 
 	return rectPlot, rectPlot_rect
 
+def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.3,
+ 	fill_color="#2ca25f", hover_color="#99d8c9",
+	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
+	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+	
+	# plot rectPlot
+	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, 
+		x_range=sorted(list(set(features1+features2))),y_axis_label="Sentiment Score")
+	rectPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
+	rectPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
+	rectPlot.xaxis.major_label_orientation = major_label_orientation
+	rectPlot.grid.grid_line_alpha=grid_line_alpha
+	rectPlot.logo = None
+	rectPlot.toolbar_location = None
+
+	color_list1 = [fill_color]*len(features1)
+	color_list2 = ['#8856a7']*len(features2)
+
+	rectPlot.rect(legend = "Product 1", color = fill_color)
+	rectPlot.rect(legend = "Product 2", color = '#8856a7')
+
+	rectPlot_rect=rectPlot.rect(features1, mids1, w, spans1, 
+		color=color_list1,hover_color=hover_color, hover_alpha=1.0)
+
+	rectPlot_rect=rectPlot.rect(features2, mids2, w, spans2, 
+		color=color_list2,hover_color=hover_color, hover_alpha=1.0)
 
 	return rectPlot, rectPlot_rect
 
@@ -122,6 +148,26 @@ def getHistPlot(histPlot_cds, color="#99d8c9",
 
 	# initialize plot
 	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', source=histPlot_cds,line_width=2,fill_alpha=0.8,color=color)
+
+	return histPlot, histPlot_quad
+
+def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#99d8c9",color2="#9e9ac8",
+	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+
+	histPlot = figure(tools="", plot_width=400, plot_height=250,
+		y_axis_label='Comments',x_axis_label="Sentiment Score")
+	
+	histPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
+	histPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
+	histPlot.logo = None
+	histPlot.toolbar_location = None
+
+	# initialize plot
+	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+		source=histPlot_cds1,line_width=2,fill_alpha=0.8,color=color1)
+
+	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+		source=histPlot_cds2,line_width=2,fill_alpha=0.8,color=color2)
 
 	return histPlot, histPlot_quad
 
