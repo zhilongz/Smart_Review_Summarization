@@ -160,16 +160,19 @@ def getWebPage(productID):
     from lxml import html
     import requests
     from fake_useragent import UserAgent #install at: https://pypi.python.org/pypi/fake-useragent
+    from time import sleep
+    import random
     url = "http://www.amazon.com/dp/" + productID
     print "Processing: " + url
     ua = UserAgent()
     headers = {
         # 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
-        'User-Agent': ua.Chrome}
+        'User-Agent': ua.random}
         # get user agent: http://www.whoishostingthis.com/tools/user-agent/ 
         # or generate random one: https://pypi.python.org/pypi/fake-useragent
     page = requests.get(url, headers=headers)
     while True:
+        sleep(int(random.random()*1+1)) # this is important not to be identified as Amazon
         try: 
             doc = html.fromstring(page.content)
             return doc
@@ -181,35 +184,35 @@ def scrape_reviews_hard(productID,checker=False):
     This method scraps directly from website and does not need userID or the AmazonScrape object
     However, it can only scrape the 5 top ranked review. 
     '''
-    # from time import sleep
-    # import random
-    doc = getWebPage(productID)
+    try: 
+        doc = getWebPage(productID)
+        XPATH_RATINGS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a/i/span//text()'
+        XPATH_REVIEWS_BODY = '//div[contains(@id, "revData-dpReviewsMostHelpfulAUI")]/div//text()'
+        XPATH_REVIEWS_IDS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/a[2]/@id'
+        RAW_RATINGS = doc.xpath(XPATH_RATINGS)
+        ratings = [x[:3] for x in RAW_RATINGS] #remove the rest of the string 
+        RAW_REVIEWS_BODY = doc.xpath(XPATH_REVIEWS_BODY)
+        RAW_REVIEWS_IDS = doc.xpath(XPATH_REVIEWS_IDS)
+        review_ids = [x[:x.index(".")] for x in  RAW_REVIEWS_IDS] #remove the rest of the string 
+        REVIEWS_BODY = ' '.join(RAW_REVIEWS_BODY).strip() if RAW_REVIEWS_BODY else None            
+        reviews_text  = REVIEWS_BODY.encode('utf-8')
+        contents = getSentencesFromReview(reviews_text.decode('utf-8'))
 
-    # sleep(int(random.random()*2+1)) # this is important not to be identified as Amazon
-    XPATH_RATINGS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a/i/span//text()'
-    XPATH_REVIEWS_BODY = '//div[contains(@id, "revData-dpReviewsMostHelpfulAUI")]/div//text()'
-    XPATH_REVIEWS_IDS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/a[2]/@id'
-    RAW_RATINGS = doc.xpath(XPATH_RATINGS)
-    ratings = [x[:3] for x in RAW_RATINGS] #remove the rest of the string 
-    RAW_REVIEWS_BODY = doc.xpath(XPATH_REVIEWS_BODY)
-    RAW_REVIEWS_IDS = doc.xpath(XPATH_REVIEWS_IDS)
-    review_ids = [x[:x.index(".")] for x in  RAW_REVIEWS_IDS] #remove the rest of the string 
-    REVIEWS_BODY = ' '.join(RAW_REVIEWS_BODY).strip() if RAW_REVIEWS_BODY else None            
-    reviews_text  = REVIEWS_BODY.encode('utf-8')
-    contents = getSentencesFromReview(reviews_text.decode('utf-8'))
+        if checker:
+            for i in range(len(review_ids)):
+                ind_new_review = []
+                if not has_review_id(productID,review_ids[i]):
+                    ind_new_review.append(i)
+            if len(ind_new_review)>0:
+                print('new reviews available from scrape_reviews_hard')
+                contents = [contents[j] for j in ind_new_review]
+                review_ids = [review_ids[j] for j in ind_new_review]
+                ratings = [ratings[j] for j in ind_new_review]
+                print review_ids
 
-    if checker:
-        for i in range(len(review_ids)):
-            ind_new_review = []
-            if not has_review_id(productID,review_ids[i]):
-                ind_new_review.append(i)
-        if len(ind_new_review)>0:
-            print('new reviews available from scrape_reviews_hard')
-            contents = [contents[j] for j in ind_new_review]
-            review_ids = [review_ids[j] for j in ind_new_review]
-            ratings = [ratings[j] for j in ind_new_review]
-
-    return contents,review_ids,ratings
+        return contents,review_ids,ratings
+    except: 
+        return scrape_reviews_hard(productID,checker)
 
 def scrape_number_review(productID):
     '''
@@ -225,6 +228,7 @@ def scrape_number_review(productID):
         return int(number_review.replace(',', '')) 
     except: 
         # reinitiate if failed
+        print 'scraper failed, reinitiate'
         return scrape_number_review(productID)
 
 def main(amazonScraper, product_id, checker=False):
@@ -246,7 +250,7 @@ def main(amazonScraper, product_id, checker=False):
 
 if __name__ == "__main__":
     # function testing 
-    productID = 'B01FHH2VR0' # B00I8BICB2 sony a6000 with 686 reviews,B00T85PH2Y,B00HZE2PYI,B00C7NX884
+    productID = 'B00THKEKEQ' # B00I8BICB2 sony a6000 with 686 reviews,B00T85PH2Y,B00HZE2PYI,B00C7NX884
     a = createAmazonScraper()   
     result = main(a,productID)
     print result

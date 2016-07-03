@@ -124,25 +124,24 @@ def update_contents_for_product_id(product_id, contents_new, review_ids_new, rat
 	Query the content from db, and appends/update 
 	'''
 	query_res = select_for_product_id(product_id)
-	contents = [query_res[0]["contents"],contents_new]
-	review_ids = [query_res[0]["review_ids"],review_ids_new]
-	ratings = [query_res[0]["ratings"], ratings_new]
+	contents = query_res[0]["contents"] + contents_new
+	review_ids = query_res[0]["review_ids"] + review_ids_new
+	ratings = query_res[0]["ratings"] + ratings_new
 
-	# involve combine two dictionary of list 
+	#merge two dictionary of lists
 	ft_score = query_res[0]["ft_score"]
 	ft_senIdx = query_res[0]["ft_senIdx"]
 	key_as_ft = set(ft_score).union(ft_score_new)
-	for ft in key_as_ft:
-		ft_score[ft].extend(ft_score_new[ft])
-		ft_senIdx[ft].extend(ft_senIdx_new[ft])
-
+	ft_score = dict((k, ft_score.get(k, []) + ft_score_new.get(k, [])) for k in key_as_ft)
+	ft_senIdx = dict((k, ft_senIdx.get(k, []) + ft_senIdx_new.get(k, [])) for k in key_as_ft)
+	
 	upsert_contents_for_product_id(product_id, contents, review_ids, ratings, num_reviews, ft_score, ft_senIdx)
 
 if __name__ == '__main__':
 	# function testing
-	product_id = 'B00MBPO5A8'
-	review_id = 'R6AY1RMVC68GF'
+	product_id = 'B00THKEKEQ'
+	review_id = 'R3V15CFZSUNBQT'
 	print has_review_id(product_id,review_id)
 	res = select_for_product_id(product_id)
-	res_content =  res[0]["contents"]
-	print res_content
+	res_content =  res[0]["ft_senIdx"]
+	print res_content 
