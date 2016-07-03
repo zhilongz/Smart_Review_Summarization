@@ -10,7 +10,7 @@ import os.path
 from utilities import getSentencesFromReview, Sentence, Review, Product, loadScraperDataFromDB
 import nltk
 from srs import settings
-from database import has_product_id, upsert_contents_for_product_id
+from database import has_product_id, upsert_contents_for_product_id,has_review_id
 
 
 class AmazonReviewScraper:
@@ -34,7 +34,7 @@ class AmazonReviewScraper:
         else:
             return ""
 
-    def process_reviews(self, rs):
+    def process_reviews(self, rs, checker, item_id):
         """
         Inputs: Amazon Reviews object, and a filehandle.
         Output: Returns number of reviews processed. Writes reviews to file.
@@ -45,9 +45,9 @@ class AmazonReviewScraper:
         count = 0
         output_str = ""
         contents = []
+        review_ids = []
+        ratings =[]
         for r in rs.full_reviews():
-            count += 1
-            
             try:
                 if self.debug:
                     logging.debug(
@@ -55,18 +55,34 @@ class AmazonReviewScraper:
                             r.id, r.date, self._encode_safe(
                                 r.text)))
                 if r.text != "None":
-                    sentenceContent_list = getSentencesFromReview(self._encode_safe(r.text))
-                    print "First sentence: " + sentenceContent_list[0]
-                    for content in sentenceContent_list:
-                        contents.append(content)
+                    if checker: # if we need to check reviewID 
+                        if has_review_id(item_id,r.id):
+                            print 'scraped review is passed as it is in db'
+                            continue 
+                        else: 
+                            count += 1
+                            sentenceContent_list = getSentencesFromReview(self._encode_safe(r.text))
+                            print "First sentence: " + sentenceContent_list[0]
+                            for content in sentenceContent_list:
+                                contents.append(content)
+                            review_ids.append(r.id)
+                            ratings.append(float(r.rating)*5) # rating directly from API is normalized to 1
+                    else: #don't need to check reviewID
+                        count += 1
+                        sentenceContent_list = getSentencesFromReview(self._encode_safe(r.text))
+                        print "First sentence: " + sentenceContent_list[0]
+                        for content in sentenceContent_list:
+                            contents.append(content)
+                        review_ids.append(r.id)
+                        ratings.append(float(r.rating)*5) # rating directly from API is normalized to 1
             except:
                 logging.warn(
                     'Encoding problem with review {}'.format(
                         r.id))
-        
-        return count, contents
 
-    def scrape_reviews(self, item_id):
+        return count, contents, review_ids, ratings
+
+    def scrape_reviews(self, item_id, checker=False):
         """
         Fetches reviews for the Amazon product with the specified ItemId. 
         """
@@ -77,21 +93,30 @@ class AmazonReviewScraper:
         count = 0
         page_count = 0
         contents = []
+        review_ids =[]
+        ratings = []
         while True:
             page_count += 1
-            result_tup = self.process_reviews(rs)
+            result_tup = self.process_reviews(rs,checker,item_id)
             count += result_tup[0]
             contents.extend(result_tup[1])
+            review_ids.extend(result_tup[2])
+            ratings.extend(result_tup[3])
+
             rs = self.amzn.reviews(URL=rs.next_page_url)
             if not rs.next_page_url:
-                result_tup = self.process_reviews(rs)
+                result_tup = self.process_reviews(rs,checker,item_id)
                 count += result_tup[0]
                 contents.extend(result_tup[1])
+                review_ids.extend(result_tup[2])
+                ratings.extend(result_tup[3])
                 break
             print "page_count: {0}".format(page_count)
-            if page_count%3 == 0:
-                print "page_count%3 == 0: {0}".format(page_count)
-                upsert_contents_for_product_id(item_id, contents)
+
+            # if page_count%3 == 0:
+            #     print "page_count%3 == 0: {0}".format(page_count)
+            #     upsert_contents_for_product_id(item_id, contents)
+                
         end = time.time()
         logging.info(
             "Collected {} reviews for item {} in {} seconds".format(
@@ -99,7 +124,7 @@ class AmazonReviewScraper:
                 item_id,
                 end -
                 start))
-        return contents
+        return contents,review_ids,ratings
 
 def getAmazomConfidentialKeys():
     conf_file = os.path.join(
@@ -131,79 +156,100 @@ def createAmazonScraper():
         debug=False)
     return a
 
-def scrape_reviews_hard(productID):
-    '''
-    This method scraps directly from website and does not need userID or the AmazonScrape object
-    However, it can only scrape the 5 top ranked review. 
-    '''
+def getWebPage(productID):
     from lxml import html
     import requests
-    from time import sleep
-    from fake_useragent import UserAgent
-    import random
-    
+    from fake_useragent import UserAgent #install at: https://pypi.python.org/pypi/fake-useragent
     url = "http://www.amazon.com/dp/" + productID
     print "Processing: " + url
     ua = UserAgent()
     headers = {
         # 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
-        'User-Agent': ua}
+        'User-Agent': ua.Chrome}
         # get user agent: http://www.whoishostingthis.com/tools/user-agent/ 
         # or generate random one: https://pypi.python.org/pypi/fake-useragent
     page = requests.get(url, headers=headers)
     while True:
-        sleep(int(random.random()*2+1)) # this is important not to be identified as Amazon
-        try:
+        try: 
             doc = html.fromstring(page.content)
-            XPATH_NAME = '//h1[@id="title"]//text()'
-            XPATH_RATINGS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a/i/span//text()'
-            XPATH_REVIEWS_TITLE = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a[2]//text()'
-            XPATH_REVIEWS_BODY = '//div[contains(@id, "revData-dpReviewsMostHelpfulAUI")]/div//text()'
-
-            RAW_NAME = doc.xpath(XPATH_NAME)
-            RAW_RATINGS = doc.xpath(XPATH_RATINGS)
-            RAW_REVIEWS_TITLE = doc.xpath(XPATH_REVIEWS_TITLE)
-            RAW_REVIEWS_BODY = doc.xpath(XPATH_REVIEWS_BODY)
-
-            NAME = ' '.join(''.join(RAW_NAME).split()) if RAW_NAME else None
-            RATINGS = ' , '.join(RAW_RATINGS).strip() if RAW_RATINGS else None
-            REVIEWS_TITLE = ' , '.join(RAW_REVIEWS_TITLE).strip() if RAW_REVIEWS_TITLE else None
-            REVIEWS_BODY = '. '.join(RAW_REVIEWS_BODY).strip() if RAW_REVIEWS_BODY else None
-            
-            reviews_text  = REVIEWS_BODY.encode('utf-8')
-            sentences = getSentencesFromReview(reviews_text.decode('utf-8'))
-
-            return sentences
-
+            return doc
         except Exception as e:
             print e
 
+def scrape_reviews_hard(productID,checker=False):
+    '''
+    This method scraps directly from website and does not need userID or the AmazonScrape object
+    However, it can only scrape the 5 top ranked review. 
+    '''
+    # from time import sleep
+    # import random
+    doc = getWebPage(productID)
 
+    # sleep(int(random.random()*2+1)) # this is important not to be identified as Amazon
+    XPATH_RATINGS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/div/div/a/i/span//text()'
+    XPATH_REVIEWS_BODY = '//div[contains(@id, "revData-dpReviewsMostHelpfulAUI")]/div//text()'
+    XPATH_REVIEWS_IDS = '//div[contains(@id, "rev-dpReviewsMostHelpfulAUI")]/a[2]/@id'
+    RAW_RATINGS = doc.xpath(XPATH_RATINGS)
+    ratings = [x[:3] for x in RAW_RATINGS] #remove the rest of the string 
+    RAW_REVIEWS_BODY = doc.xpath(XPATH_REVIEWS_BODY)
+    RAW_REVIEWS_IDS = doc.xpath(XPATH_REVIEWS_IDS)
+    review_ids = [x[:x.index(".")] for x in  RAW_REVIEWS_IDS] #remove the rest of the string 
+    REVIEWS_BODY = ' '.join(RAW_REVIEWS_BODY).strip() if RAW_REVIEWS_BODY else None            
+    reviews_text  = REVIEWS_BODY.encode('utf-8')
+    contents = getSentencesFromReview(reviews_text.decode('utf-8'))
 
-def main(amazonScraper, productID):
+    if checker:
+        for i in range(len(review_ids)):
+            ind_new_review = []
+            if not has_review_id(productID,review_ids[i]):
+                ind_new_review.append(i)
+        if len(ind_new_review)>0:
+            print('new reviews available from scrape_reviews_hard')
+            contents = [contents[j] for j in ind_new_review]
+            review_ids = [review_ids[j] for j in ind_new_review]
+            ratings = [ratings[j] for j in ind_new_review]
 
-    if not has_product_id(productID):
-        contents = amazonScraper.scrape_reviews(productID)
-        return contents
-    else:
-        print "{0} is already scraped and has reviews stored.".format(productID)
-        contents, _, _ = loadScraperDataFromDB(productID)
-        return contents
+    return contents,review_ids,ratings
+
+def scrape_number_review(productID):
+    '''
+    return total number of reviews 
+    '''
+    try: 
+        doc = getWebPage(productID)
+        XPATH_TOTAL_REVIEW = '//div[contains(@id, "averageCustomerReviews")]/span[3]/a/span/text()'
+        RAW_TOTAL_REVIEW = doc.xpath(XPATH_TOTAL_REVIEW)
+        ind = RAW_TOTAL_REVIEW[0].index('c')
+
+        number_review = RAW_TOTAL_REVIEW[0][:ind-1] # example: 1,029 customer reviews 
+        return int(number_review.replace(',', '')) 
+    except: 
+        # reinitiate if failed
+        return scrape_number_review(productID)
+
+def main(amazonScraper, product_id, checker=False):
+    number_review = scrape_number_review(product_id)
+    if has_product_id(product_id):
+        print "{0} is already scraped...scrape for more".format(product_id)
+        # scrape contents while checking for conflict review 
+        checker = True
+
+    try: 
+        contents,review_ids,ratings = amazonScraper.scrape_reviews(product_id,checker)
+        return contents,review_ids,ratings,number_review
+    except:
+        # backup scraper 
+        print 'Amazon API failed. Scrape the hard way!'
+        contents,review_ids,ratings = scrape_reviews_hard(product_id,checker)
+        return contents,review_ids,ratings,number_review
 
 
 if __name__ == "__main__":
-
-    productID = 'B00C7NX884' # B00I8BICB2 sony a6000 with 686 reviews,B00T85PH2Y
+    # function testing 
+    productID = 'B01FHH2VR0' # B00I8BICB2 sony a6000 with 686 reviews,B00T85PH2Y,B00HZE2PYI,B00C7NX884
     a = createAmazonScraper()   
-    content = main(a,productID)
-    # sentences = scrape_reviews_hard(productID)
-    # print sentences
+    result = main(a,productID)
+    print result
+    print scrape_number_review(productID)
+    # print scrape_reviews_hard(productID)
 
-
-    # p = a.amzn.lookup(ItemId=productID)
-    # rs = p.reviews()
-    # for r in rs.full_reviews():
-    #     print r.text
-
-    # content = main(a, productID)
-    # print content
