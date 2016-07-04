@@ -108,7 +108,7 @@ def loadScraperDataFromDB(product_id):
         return [], {}, {}
         
 class Sentence(object):
-    def __init__(self, content, tokens=[], labeled_aspects='', sentiment=None, dynamic_aspects=[],word2vec_features_list=[]):
+    def __init__(self, content, tokens=[], labeled_aspects='', sentiment=None, word2vec_features_list=[]):
         self.content = content
         self.tokens = tokens
         if not self.tokens:
@@ -116,10 +116,8 @@ class Sentence(object):
         self.labeled_aspects = labeled_aspects
         self.sentiment = sentiment
         self.pos_tagged_tokens = []
-        self.dynamic_aspects = []
         self.static_aspect = None
         self.score = 0.0
-        self.dynamic_aspects = dynamic_aspects
         self.word2vec_features_list = word2vec_features_list
         
 
@@ -133,33 +131,8 @@ class Sentence(object):
         # pos tagging
         self.pos_tagged_tokens = nltk.pos_tag(self.tokens)
 
-    def matchDaynamicAspectPatterns(self, patterns):
-        """
-        INPUT: a list of patterns
-        OUTPUT: figure out the dynamic aspects matching the patterns
-        """
-        STOPWORDS = set(nltk.corpus.stopwords.words('english'))
 
-        for pattern in patterns:
-            chunkParser = nltk.RegexpParser(pattern.structure)
-            if not self.pos_tagged_tokens:
-                self.pos_tag()
-            
-            chunked = chunkParser.parse(self.pos_tagged_tokens)
-            for subtree in chunked.subtrees(filter=lambda t: t.label() == pattern.name):
-                aspectCandidateWords = []
-                for idx in pattern.aspectTagIndices:
-                    aspectCandidateWord = subtree[idx][0]
-                    if aspectCandidateWord in STOPWORDS:
-                        aspectCandidateWords = []
-                        break
-                    else:
-                        aspectCandidateWords.append(aspectCandidateWord)
-                aspectCandidate = ' '.join(aspectCandidateWords)
-                if aspectCandidate != '' and aspectCandidate not in self.dynamic_aspects:
-                    self.dynamic_aspects.append(aspectCandidate)
-
-    def word2vec_matchDaynamicAspectPatterns(self, word2vec_patterns):
+    def word2vec_matchDaynamicAspectPatterns(self, word2vec_patterns, if_accept_same_word = 1):
         """
         INPUT: a list of patterns
         OUTPUT: figure out the dynamic aspects matching the patterns
@@ -186,8 +159,12 @@ class Sentence(object):
                         else:
                             aspectCandidateWords.append(aspectCandidateWord)
                     aspectCandidate = ' '.join(aspectCandidateWords)
-                    if aspectCandidate != '':
-                        self.word2vec_features_list[i].append(aspectCandidate)
+                    if if_accept_same_word == 1:
+                        if aspectCandidate != '':
+                            self.word2vec_features_list[i].append(aspectCandidate)
+                    elif if_accept_same_word == 0:
+                        if aspectCandidate != '' and aspectCandidate not in self.word2vec_features_list[i]:
+                            self.word2vec_features_list[i].append(aspectCandidate)
 
 
 class AspectPattern(object):
