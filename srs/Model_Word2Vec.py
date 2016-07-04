@@ -10,13 +10,11 @@ class AspectPatterns(object):
 		for pattern_name in pattern_name_list:
 			if pattern_name == 'adj_nn':
 				aspectPatterns_1 = []
-				pattern_name = 'adj_nn'
 				pattern_structure ="""adj_nn:{<JJ><NN.?>}"""
 				aspectTagIndices = [0,1]
 				aspectPattern = AspectPattern(name='adj_nn', structure=pattern_structure, aspectTagIndices=aspectTagIndices)
 				aspectPatterns_1.append(aspectPattern)
 
-				pattern_name = 'nn_nn'
 				pattern_structure ="""nn_nn:{<NN.?><NN.?>}"""
 				aspectPattern = AspectPattern(name='nn_nn', structure=pattern_structure, aspectTagIndices=aspectTagIndices)
 				aspectPatterns_1.append(aspectPattern)
@@ -24,7 +22,6 @@ class AspectPatterns(object):
 
 			elif pattern_name == 'nn':
 				aspectPatterns_2 = []
-				pattern_name = 'nn'
 				pattern_structure ="""nn:{<NN.?>}"""
 				aspectTagIndices = [0]
 				aspectPattern = AspectPattern(name='nn', structure=pattern_structure, aspectTagIndices=aspectTagIndices)
@@ -33,7 +30,6 @@ class AspectPatterns(object):
 
 			elif pattern_name == 'adj':
 				aspectPatterns_3 = []
-				pattern_name = 'adj'
 				pattern_structure ="""adj:{<JJ.?>}"""
 				aspectTagIndices = [0]
 				aspectPattern = AspectPattern(name='adj', structure=pattern_structure, aspectTagIndices=aspectTagIndices)
@@ -41,13 +37,12 @@ class AspectPatterns(object):
 				self.aspectPatterns_list.append(aspectPatterns_3)
 
 			elif pattern_name == 'adv':
-				pattern_name = 'adv_compara'
+				aspectPatterns_4 = []
 				pattern_structure ="""adv_compara:{<RBR>}"""
 				aspectTagIndices = [0]
 				aspectPattern = AspectPattern(name='adv_compara', structure=pattern_structure, aspectTagIndices=aspectTagIndices)
 				aspectPatterns_4.append(aspectPattern)
 
-				pattern_name = 'adv_super'
 				pattern_structure ="""adv_super:{<RBS>}"""
 				aspectTagIndices = [0]
 				aspectPattern = AspectPattern(name='adv_super', structure=pattern_structure, aspectTagIndices=aspectTagIndices)
@@ -59,6 +54,12 @@ def distill_dynamic(sentence, aspectPatterns):
 	if not sentence.pos_tagged_tokens:
 		sentence.pos_tag()
 	sentence.word2vec_matchDaynamicAspectPatterns(aspectPatterns.aspectPatterns_list)
+
+def distill_dynamic_sentencelist(sentence_list, aspectPatterns):
+	for sentence in sentence_list:
+		if not sentence.pos_tagged_tokens:
+			sentence.pos_tag()
+		sentence.word2vec_matchDaynamicAspectPatterns(aspectPatterns.aspectPatterns_list)
 
 
 def static_aspect_to_vec(static_aspects_all, model):
