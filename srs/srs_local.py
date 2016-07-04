@@ -1,5 +1,5 @@
 from scraper import main as scraper_main, createAmazonScraper
-from predictor import StaticPredictor, loadTrainedStaticPredictor
+from predictor import MaxEntropy_Predictor, Word2Vec_Predictor, loadTrainedPredictor
 from srs import settings
 from utilities import loadScraperDataFromDB, Sentence
 from swnModel import get_sentiment_score_for_sentences, get_ftScore_ftSenIdx_dicts
@@ -7,17 +7,18 @@ from sentiment_plot import box_plot
 from database import upsert_contents_for_product_id, update_for_product_id
 import os
 
-def get_ft_dicts_from_contents(contents, staticPredictor):
+def get_ft_dicts_from_contents(contents, predictor):
 	sentences = []
 	for cont in contents:
 		sentences.append(Sentence(content=cont))
 
-	staticPredictor.predict_for_sentences(sentences, cp_threshold=0.5)	
+	
+	predictor.predict_for_sentences(sentences)	#if Maxentropy, the cp_threshold=0.5, if Word2Vec, the cp_threshold should be 0.85 for criteria_for_choosing_class = "max", similarity_measure = "max"
 	get_sentiment_score_for_sentences(sentences)
 	return get_ftScore_ftSenIdx_dicts(sentences)
 	
 
-def fill_in_db(amazonScraper, product_id):
+def fill_in_db(amazonScraper, product_id, predictor_name = 'MaxEntropy'):
 	
 	# fetch product info from db 
 	prod1_contents, prod1_ft_score_dict, prod1_ft_senIdx_dict = loadScraperDataFromDB(product_id)
@@ -27,9 +28,9 @@ def fill_in_db(amazonScraper, product_id):
 		prod1_contents = scraper_main(amazonScraper, product_id)
 		
 		# classify, sentiment score
-		staticPredictor = loadTrainedStaticPredictor()
+		predictor = loadTrainedPredictor(predictor_name)
 		prod1_ft_score_dict, prod1_ft_senIdx_dict = \
-		get_ft_dicts_from_contents(prod1_contents, staticPredictor)
+		get_ft_dicts_from_contents(prod1_contents, predictor)
 		
 		# insert new entry
 		upsert_contents_for_product_id(product_id, prod1_contents, \
@@ -40,9 +41,9 @@ def fill_in_db(amazonScraper, product_id):
 	elif len(prod1_ft_score_dict) == 0 or len(prod1_ft_senIdx_dict) == 0:
 		
 		# classify, sentiment score
-		staticPredictor = loadTrainedStaticPredictor()
+		predictor = loadTrainedPredictor(predictor_name)
 		prod1_ft_score_dict, prod1_ft_senIdx_dict = \
-		get_ft_dicts_from_contents(prod1_contents, staticPredictor)
+		get_ft_dicts_from_contents(prod1_contents, predictor)
 		
 		# update old entry
 		update_for_product_id(product_id, prod1_ft_score_dict, prod1_ft_senIdx_dict)
