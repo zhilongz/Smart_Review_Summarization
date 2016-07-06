@@ -3,6 +3,7 @@ from srs.sentiment_plot import sentimentBoxPlot, sentimentBoxPlot_Compare
 from srs.srs_local import fill_in_db
 from srs.utilities import loadScraperDataFromDB
 from srs.scraper import createAmazonScraper
+from srs.scraper import scrape_reviews_hard
 import json
 import numpy as np
 
@@ -21,14 +22,12 @@ def scrape_reviews():
 		product_id2 = request.form["product_id2"]
 		if not product_id2:		
 			print 'product_id is ' + product_id			
-			a = createAmazonScraper()
-			fill_in_db(a, product_id)
+			fill_in_db(product_id)
 			return str(product_id)
 		else:
 			print 'product_id are ' + product_id	+ ' and '+ product_id2
-			a = createAmazonScraper()
-			fill_in_db(a, product_id)
-			fill_in_db(a, product_id2)
+			fill_in_db(product_id)
+			fill_in_db(product_id2)
 			return str(product_id) + "&" + str(product_id2)
 
 	else:
