@@ -88,9 +88,6 @@ function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
         console.log(example_sen[0]);
         $("#sample_sen1").text(example_sen[0]);
     }
-    else {
-        $("#sample_sen1").text("");
-    }
 }
 
 $("#input_form").submit(function(e){    
