@@ -244,9 +244,6 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
 	feature_scorelist_dict2, feature_senIdxlist_dict2, contents2, sort=True)
 
 	# plot rectPlot
-	features = features1 + features2
-	mids = mids1 + mids2
-	spans = spans1 + spans2
 	rectPlot, rectPlot_rect1, rectPlot_rect2 = getRectPlot_compare(features1, mids1, spans1, 
 		features2, mids2, spans2)
 
