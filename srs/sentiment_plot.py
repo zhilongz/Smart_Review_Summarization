@@ -109,7 +109,7 @@ def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color=
 	return rectPlot, rectPlot_rect
 
 def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.3,
- 	fill_color="#2ca25f", hover_color="#99d8c9",
+ 	color1="#2ca25f",color2="#8856a7", hover_color1="#99d8c9",hover_color2="#9e9ac8",
 	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
 	
@@ -123,8 +123,8 @@ def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.
 	rectPlot.logo = None
 	rectPlot.toolbar_location = None
 
-	color_list1 = [fill_color]*len(features1)
-	color_list2 = ['#8856a7']*len(features2)
+	color_list1 = [color1]*len(features1)
+	color_list2 = [color2]*len(features2)	
 
 	rectPlot.rect(legend = "Product 1", color = fill_color)
 	rectPlot.rect(legend = "Product 2", color = '#8856a7')
