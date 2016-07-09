@@ -126,16 +126,15 @@ def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.
 	color_list1 = [color1]*len(features1)
 	color_list2 = [color2]*len(features2)	
 
-	rectPlot.rect(legend = "Product 1", color = fill_color)
-	rectPlot.rect(legend = "Product 2", color = '#8856a7')
+	rectPlot_rect1 = rectPlot.rect(features1, mids1, w, spans1, 
+		color=color_list1,hover_color=hover_color1, hover_alpha=1.0,
+		legend = "Product 1")
 
-	rectPlot_rect=rectPlot.rect(features1, mids1, w, spans1, 
-		color=color_list1,hover_color=hover_color, hover_alpha=1.0)
+	rectPlot_rect2 = rectPlot.rect(features2, mids2, w, spans2, 
+		color=color_list2,hover_color=hover_color2, hover_alpha=1.0,
+		legend = "Product 2")
 
-	rectPlot_rect=rectPlot.rect(features2, mids2, w, spans2, 
-		color=color_list2,hover_color=hover_color, hover_alpha=1.0)
-
-	return rectPlot, rectPlot_rect
+	return rectPlot, rectPlot_rect1, rectPlot_rect2
 
 def getHistPlot(histPlot_cds, color="#99d8c9",
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
@@ -248,7 +247,7 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
 	features = features1 + features2
 	mids = mids1 + mids2
 	spans = spans1 + spans2
-	rectPlot, rectPlot_rect = getRectPlot_compare(features1, mids1, spans1, 
+	rectPlot, rectPlot_rect1, rectPlot_rect2 = getRectPlot_compare(features1, mids1, spans1, 
 		features2, mids2, spans2)
 
 	# plot histPlot
@@ -268,8 +267,20 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
         
 		"""
 
-	hoverCallBack=CustomJS(args={'histPlot_cds':histPlot_cds1, 'hist_cds':hist_cds1},code=hoverJS)
-	rectPlot.add_tools(HoverTool(renderers=[rectPlot_rect],callback=hoverCallBack,tooltips=None))
+	hoverCallBack=CustomJS(
+		args={'histPlot_cds1':histPlot_cds1, 'hist_cds1':hist_cds1, 
+		'histPlot_cds2':histPlot_cds2, 'hist_cds2':hist_cds2},
+		code=hoverJS)
+	rectPlot.add_tools(
+		HoverTool(
+			renderers=[rectPlot_rect1],
+			callback=hoverCallBack,
+			tooltips=None))
+	rectPlot.add_tools(
+		HoverTool(
+			renderers=[rectPlot_rect2],
+			callback=hoverCallBack,
+			tooltips=None))
 
 	# add interaction between histPlot and sample reviews
 	hoverJS2="""
