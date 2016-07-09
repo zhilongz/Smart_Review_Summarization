@@ -162,13 +162,13 @@ def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#99d8c9",color2="#
 	histPlot.toolbar_location = None
 
 	# initialize plot
-	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+	histPlot_quad1 = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
 		source=histPlot_cds1,line_width=2,fill_alpha=0.8,color=color1)
 
-	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+	histPlot_quad2 = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
 		source=histPlot_cds2,line_width=2,fill_alpha=0.8,color=color2)
 
-	return histPlot, histPlot_quad
+	return histPlot, histPlot_quad1, histPlot_quad2
 
 def getInitialHistPlotData(hist_cds):
 
@@ -253,17 +253,21 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
 	# plot histPlot
 	histPlot_cds1 = getInitialHistPlotData(hist_cds1)
 	histPlot_cds2 = getInitialHistPlotData(hist_cds2)
-	histPlot, histPlot_quad = getHistPlot_compare(histPlot_cds1, histPlot_cds2)
+	histPlot, histPlot_quad1, histPlot_quad2= getHistPlot_compare(histPlot_cds1, histPlot_cds2)
 
 	# add interaction between rectPlot and histPlot
 	hoverJS="""
-		var histPlot_data = histPlot_cds.get('data');
-		var features = hist_cds.get('data')['features'];
-		var hist_data = hist_cds.get('data');
+		var histPlot_data1 = histPlot_cds1.get('data');
+		var hist_data1 = hist_cds1.get('data');
+		var histPlot_data2 = histPlot_cds2.get('data');
+		var hist_data2 = hist_cds2.get('data');
+
+		var features = hist_cds1.get('data')['features'];
 
 		//get current hovering index
-		fillHistData(cb_data, histPlot_data, features, hist_data);		
-		histPlot_cds.trigger('change');
+		fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data2, hist_data2, features);		
+		histPlot_cds1.trigger('change');
+		histPlot_cds2.trigger('change');
         
 		"""
 
@@ -291,8 +295,25 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
         
 		""" 
 
-	hoverCallBack2=CustomJS(args={'sampleSentences_cds':sampleSentences_cds1, 'histPlot_cds': histPlot_cds1}, code=hoverJS2)
-	histPlot.add_tools(HoverTool(renderers=[histPlot_quad],callback=hoverCallBack2,tooltips=None))
+	hoverCallBack2_1=CustomJS(
+		args={'sampleSentences_cds':sampleSentences_cds1, 'histPlot_cds': histPlot_cds1}, 
+		code=hoverJS2)
+	
+	histPlot.add_tools(
+		HoverTool(
+			renderers=[histPlot_quad1],
+			callback=hoverCallBack2_1,
+			tooltips=None))
+
+	hoverCallBack2_2=CustomJS(
+		args={'sampleSentences_cds':sampleSentences_cds2, 'histPlot_cds': histPlot_cds2}, 
+		code=hoverJS2)
+	
+	histPlot.add_tools(
+		HoverTool(
+			renderers=[histPlot_quad2],
+			callback=hoverCallBack2_2,
+			tooltips=None))
 
 	return (rectPlot,histPlot)
 
