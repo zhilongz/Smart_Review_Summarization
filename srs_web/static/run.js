@@ -42,6 +42,44 @@ function fillHistData(cb_data, histPlot_data, features, hist_data) {
     
 }
 
+function fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data2, hist_data2, features) {
+    var current_index = cb_data.index['1d'].indices[0];
+
+
+    if (typeof current_index != 'undefined'){
+        console.log(current_index);
+
+        feature = features[current_index];
+
+        histTop1 = hist_data1['tops'][current_index];
+        histLeft1 = hist_data1['lefts'][current_index];
+        histRight1 = hist_data1['rights'][current_index];
+
+        bin_num1 = histTop1.length;
+        //Defining the drawing parameters for Fig2
+        histPlot_data1['bottom'] = new Array(bin_num1).fill(0);
+        histPlot_data1['top'] = histTop1;
+        histPlot_data1['left']= histLeft1;
+        histPlot_data1['right']= histRight1;
+        histPlot_data1['feature'] = feature;
+
+        histTop2 = hist_data2['tops'][current_index];
+        histLeft2 = hist_data2['lefts'][current_index];
+        histRight2 = hist_data2['rights'][current_index];
+
+        bin_num2 = histTop2.length;
+        //Defining the drawing parameters for Fig2
+        histPlot_data2['bottom'] = new Array(bin_num2).fill(0);
+        histPlot_data2['top'] = histTop2;
+        histPlot_data2['left']= histLeft2;
+        histPlot_data2['right']= histRight2;
+        histPlot_data2['feature'] = feature;
+
+        console.log(feature);
+        $("#histPlotTitle p").text(feature); 
+        
+    }
+}
 function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
     var barIdx = cb_data.index['1d'].indices[0];
 
@@ -49,9 +87,6 @@ function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
         var example_sen = sampleSentences_dict[feature][barIdx];
         console.log(example_sen[0]);
         $("#sample_sen1").text(example_sen[0]);
-    }
-    else {
-        $("#sample_sen1").text("");
     }
 }
 

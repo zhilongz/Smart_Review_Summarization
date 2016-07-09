@@ -109,7 +109,7 @@ def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color=
 	return rectPlot, rectPlot_rect
 
 def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.3,
- 	fill_color="#2ca25f", hover_color="#99d8c9",
+ 	color1="#2ca25f",color2="#8856a7", hover_color1="#99d8c9",hover_color2="#9e9ac8",
 	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
 	
@@ -123,19 +123,18 @@ def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.
 	rectPlot.logo = None
 	rectPlot.toolbar_location = None
 
-	color_list1 = [fill_color]*len(features1)
-	color_list2 = ['#8856a7']*len(features2)
+	color_list1 = [color1]*len(features1)
+	color_list2 = [color2]*len(features2)	
 
-	rectPlot.rect(legend = "Product 1", color = fill_color)
-	rectPlot.rect(legend = "Product 2", color = '#8856a7')
+	rectPlot_rect1 = rectPlot.rect(features1, mids1, w, spans1, 
+		color=color_list1,hover_color=hover_color1, hover_alpha=1.0,
+		legend = "Product 1")
 
-	rectPlot_rect=rectPlot.rect(features1, mids1, w, spans1, 
-		color=color_list1,hover_color=hover_color, hover_alpha=1.0)
+	rectPlot_rect2 = rectPlot.rect(features2, mids2, w, spans2, 
+		color=color_list2,hover_color=hover_color2, hover_alpha=1.0,
+		legend = "Product 2")
 
-	rectPlot_rect=rectPlot.rect(features2, mids2, w, spans2, 
-		color=color_list2,hover_color=hover_color, hover_alpha=1.0)
-
-	return rectPlot, rectPlot_rect
+	return rectPlot, rectPlot_rect1, rectPlot_rect2
 
 def getHistPlot(histPlot_cds, color="#99d8c9",
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
@@ -163,13 +162,13 @@ def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#99d8c9",color2="#
 	histPlot.toolbar_location = None
 
 	# initialize plot
-	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+	histPlot_quad1 = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
 		source=histPlot_cds1,line_width=2,fill_alpha=0.8,color=color1)
 
-	histPlot_quad = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
+	histPlot_quad2 = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
 		source=histPlot_cds2,line_width=2,fill_alpha=0.8,color=color2)
 
-	return histPlot, histPlot_quad
+	return histPlot, histPlot_quad1, histPlot_quad2
 
 def getInitialHistPlotData(hist_cds):
 
@@ -245,31 +244,44 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
 	feature_scorelist_dict2, feature_senIdxlist_dict2, contents2, sort=True)
 
 	# plot rectPlot
-	features = features1 + features2
-	mids = mids1 + mids2
-	spans = spans1 + spans2
-	rectPlot, rectPlot_rect = getRectPlot_compare(features1, mids1, spans1, 
+	rectPlot, rectPlot_rect1, rectPlot_rect2 = getRectPlot_compare(features1, mids1, spans1, 
 		features2, mids2, spans2)
 
 	# plot histPlot
 	histPlot_cds1 = getInitialHistPlotData(hist_cds1)
 	histPlot_cds2 = getInitialHistPlotData(hist_cds2)
-	histPlot, histPlot_quad = getHistPlot_compare(histPlot_cds1, histPlot_cds2)
+	histPlot, histPlot_quad1, histPlot_quad2= getHistPlot_compare(histPlot_cds1, histPlot_cds2)
 
 	# add interaction between rectPlot and histPlot
 	hoverJS="""
-		var histPlot_data = histPlot_cds.get('data');
-		var features = hist_cds.get('data')['features'];
-		var hist_data = hist_cds.get('data');
+		var histPlot_data1 = histPlot_cds1.get('data');
+		var hist_data1 = hist_cds1.get('data');
+		var histPlot_data2 = histPlot_cds2.get('data');
+		var hist_data2 = hist_cds2.get('data');
+
+		var features = hist_cds1.get('data')['features'];
 
 		//get current hovering index
-		fillHistData(cb_data, histPlot_data, features, hist_data);		
-		histPlot_cds.trigger('change');
+		fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data2, hist_data2, features);		
+		histPlot_cds1.trigger('change');
+		histPlot_cds2.trigger('change');
         
 		"""
 
-	hoverCallBack=CustomJS(args={'histPlot_cds':histPlot_cds1, 'hist_cds':hist_cds1},code=hoverJS)
-	rectPlot.add_tools(HoverTool(renderers=[rectPlot_rect],callback=hoverCallBack,tooltips=None))
+	hoverCallBack=CustomJS(
+		args={'histPlot_cds1':histPlot_cds1, 'hist_cds1':hist_cds1, 
+		'histPlot_cds2':histPlot_cds2, 'hist_cds2':hist_cds2},
+		code=hoverJS)
+	rectPlot.add_tools(
+		HoverTool(
+			renderers=[rectPlot_rect1],
+			callback=hoverCallBack,
+			tooltips=None))
+	rectPlot.add_tools(
+		HoverTool(
+			renderers=[rectPlot_rect2],
+			callback=hoverCallBack,
+			tooltips=None))
 
 	# add interaction between histPlot and sample reviews
 	hoverJS2="""
@@ -280,8 +292,25 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
         
 		""" 
 
-	hoverCallBack2=CustomJS(args={'sampleSentences_cds':sampleSentences_cds1, 'histPlot_cds': histPlot_cds1}, code=hoverJS2)
-	histPlot.add_tools(HoverTool(renderers=[histPlot_quad],callback=hoverCallBack2,tooltips=None))
+	hoverCallBack2_1=CustomJS(
+		args={'sampleSentences_cds':sampleSentences_cds1, 'histPlot_cds': histPlot_cds1}, 
+		code=hoverJS2)
+	
+	histPlot.add_tools(
+		HoverTool(
+			renderers=[histPlot_quad1],
+			callback=hoverCallBack2_1,
+			tooltips=None))
+
+	hoverCallBack2_2=CustomJS(
+		args={'sampleSentences_cds':sampleSentences_cds2, 'histPlot_cds': histPlot_cds2}, 
+		code=hoverJS2)
+	
+	histPlot.add_tools(
+		HoverTool(
+			renderers=[histPlot_quad2],
+			callback=hoverCallBack2_2,
+			tooltips=None))
 
 	return (rectPlot,histPlot)
 
