@@ -15,7 +15,7 @@
 
 # Data files
 data/*
-*.txt
+
 
 # config files
 *.ini
