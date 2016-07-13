@@ -115,11 +115,11 @@ class MaxEntropy_Predictor(Predictor):
 		else:
 			return predicted_aspect
 
-	def predict_for_sentences(self, sentences, cp_threshold=0.0, debug=False):
+	def predict_for_sentences(self, sentences, cp_threshold=0.5, debug=False):
 
 		for sentence in sentences:
 			if debug:
-				sentence.static_aspect = self.predict(sentence, cp_threshold=cp_threshold)[0]
+				sentence.static_aspect = self.predict(sentence, cp_threshold=cp_threshold, debug=debug)[0]
 			else:
 				sentence.static_aspect = self.predict(sentence, cp_threshold=cp_threshold)
 
