@@ -52,7 +52,7 @@ class AspectPatterns(object):
 
 def distill_dynamic(sentence, aspectPatterns):
 	if not sentence.pos_tagged_tokens:
-		sentence.pos_tag()
+		sentence.pos_tag(stem=False)
 	sentence.word2vec_matchDaynamicAspectPatterns(aspectPatterns.aspectPatterns_list)
 
 def distill_dynamic_sentencelist(sentence_list, aspectPatterns):
