@@ -70,8 +70,7 @@ def static_aspect_to_vec(static_aspects_all, model):
 	num_useful=len(static_aspect_list_fortraining)
 	static_wordlist_vec=[[] for i in range(num_useful)]
 	for i in range(num_useful):
-		for j in range(len(wordlist_dic[static_aspect_list_show[i]])):
-			word=wordlist_dic[static_aspect_list_show[i]][j]
+		for word in wordlist_dic[static_aspect_list_show[i]]:
 			if word in model:
 				static_wordlist_vec[i].append(model[word])
 
@@ -93,16 +92,15 @@ def predict_aspect_word2vec(sentence, model, aspectPatterns, static_aspect_list,
 	for item in sentence.word2vec_features_list:
 		word2vec_features=word2vec_features + item
 	vec_list=[]
-	if word2vec_features:
-		for dynamic_aspect in word2vec_features:
-			dynamic_aspect_splitted=dynamic_aspect.split(' ')
-			aspect_phrase_vec=[]
-			for aspect in dynamic_aspect_splitted:
-				if aspect in model:
-					aspect_word_vec=model[aspect]
-					aspect_phrase_vec.append(aspect_word_vec)
-			if aspect_phrase_vec:
-				vec_list.append(aspect_phrase_vec)	
+	for dynamic_aspect in word2vec_features:
+		dynamic_aspect_splitted=dynamic_aspect.split(' ')
+		aspect_phrase_vec=[]
+		for aspect in dynamic_aspect_splitted:
+			if aspect in model:
+				aspect_word_vec=model[aspect]
+				aspect_phrase_vec.append(aspect_word_vec)
+		if aspect_phrase_vec:
+			vec_list.append(aspect_phrase_vec)	
 	
 	#calculating vector distance of the dynamic aspects to each phrase in the static aspect:
 	#similarity_matrix is the similarity matrix, and (i,j) entry is the similarity between the i th word in the dynamic aspect and the j th word in the static aspect.
