@@ -2,7 +2,7 @@ import numpy as np
 import math as math
 import word2vec
 from predictor import loadTrainedPredictor, Word2Vec_Predictor
-from Model_Word2Vec import distill_dynamic_sentencelist, AspectPatterns, static_aspect_to_vec
+from word2VecModel import distill_dynamic_sentencelist, AspectPatterns, static_aspect_to_vec
 from utilities import Sentence
 
 def Word2Vec_Predictor_test(sentence_list, aspectPattern_names, criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold, lookup, Isprint=0):
@@ -34,10 +34,13 @@ def Word2Vec_Predictor_test(sentence_list, aspectPattern_names, criteria_for_cho
 	classified_sentences_matrix=[[[] for j in range(num_useful+1)] for i in range(num_useful+1)]
 
 	# Classify each sentence
+	predictions = []
 	for sentence in sentence_list:
 		count=count+1
-		aspect_prediction =p.predict(sentence, model, aspectPatterns, static_aspect_list, static_wordlist_vec, criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold)
+		aspect_prediction =p.predict(sentence, criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold)
 
+		predictions.append(aspect_prediction[0])
+		
 		aspect_true=sentence.labeled_aspects
 		classification=(aspect_true,aspect_prediction[0],sentence.word2vec_features_list,aspect_prediction[1][:3],sentence.content)
 
@@ -69,14 +72,12 @@ def Word2Vec_Predictor_test(sentence_list, aspectPattern_names, criteria_for_cho
 			else: correct_item_precision[ii]=-1
 		correct_item_recall=np.divide(1.*correctness_matrix.diagonal(),count_item_truelabel)	
 		print ((count,str(round(100.*correct_all,2))+'%'),(count_useful_total,str(round(100.*correct_useful_precision))+'%',str(round(100.*correct_useful_recall))+'%'),count_useless2useful,count_useful2useless)
-		for i in range(num_useful+1):
-			print (static_aspect_list_show[i],round(correct_item_precision[i],3),round(correct_item_recall[i],3))
 		print static_aspect_list_show
 		print correctness_matrix
 		for i in range(len(classified_sentences_matrix[lookup[0]][lookup[1]])):
 			print classified_sentences_matrix[lookup[0]][lookup[1]][i]
 			print " "
-	return (correct_all,correct_useful_precision,correct_useful_recall,count_useless2useful,count_useful2useless)
+	return np.array(predictions)
 
 def load_labeled_file_without_aspect(file_name): 
     with open(file_name) as f:

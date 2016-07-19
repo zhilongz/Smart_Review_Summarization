@@ -7,13 +7,13 @@ import json
 import unittest
 from srs import settings
 
-class TestStaticPredictor(unittest.TestCase):
+class TestMaxEntropy_Predictor(unittest.TestCase):
 
 	def setUp(self):
 		"""
 		A method that is run before each unit test in this class.
 		"""
-		self.staticPredictor = StaticPredictor()
+		self.staticPredictor = MaxEntropy_Predictor()
 		param_filename = 'lambda_opt_regu3.txt'
 		wordlist_filename = 'wordlist_dict_1.txt'
 		self.staticPredictor.loadParams(param_filename)
