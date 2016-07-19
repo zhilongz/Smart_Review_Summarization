@@ -38,7 +38,7 @@ def getSentencesFromReview(reviewContent):
             final_sentences.append(sentence)
     return final_sentences
 
-def tokenize(string):
+def tokenize(string, stem=True):
     """
     INPUT: string
     OUTPUT: a list of words
@@ -56,11 +56,12 @@ def tokenize(string):
     token_list = [word for word in token_list if word not in STOPWORDS]
 
     #stemmer 
-    # stemmer = PorterStemmer()
-    stemmer = SnowballStemmer("english")
-    token_stem_list = [stemmer.stem(token) for token in token_list]
+    if stem:
+        stemmer = SnowballStemmer("english")
+        token_stem_list = [stemmer.stem(token) for token in token_list]
+        token_list = token_stem_list
 
-    return token_stem_list
+    return token_list
 
 def loadUsefulTrainingData(static_training_data_dir):
     import os
@@ -121,13 +122,13 @@ class Sentence(object):
         self.word2vec_features_list = word2vec_features_list
         
 
-    def tokenize(self):
-        self.tokens = tokenize(self.content)
+    def tokenize(self, stem=True):
+        self.tokens = tokenize(self.content, stem=stem)
 
-    def pos_tag(self):
+    def pos_tag(self, stem=True):
         # if not tokenized do that first
         if not self.tokens:
-            self.tokenize()
+            self.tokenize(stem)
         # pos tagging
         self.pos_tagged_tokens = nltk.pos_tag(self.tokens)
 

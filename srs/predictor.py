@@ -5,7 +5,7 @@ import numpy as np
 import word2vec
 from abc import ABCMeta, abstractmethod
 from maxEntropyModel import cond_prob, loadWordListDict, train
-from Model_Word2Vec import AspectPatterns, predict_aspect_word2vec, static_aspect_to_vec
+from word2VecModel import AspectPatterns, predict_aspect_word2vec, static_aspect_to_vec
 from utilities import loadUsefulTrainingData, loadScraperDataFromDB, Sentence
 from srs import settings
 
@@ -125,8 +125,8 @@ class MaxEntropy_Predictor(Predictor):
 
 
 class Word2Vec_Predictor(Predictor):
-	def __init__(self):
-		self.aspectPatterns = []
+	def __init__(self, aspectPattern_names=['adj_nn','nn']):
+		self.aspectPatterns = AspectPatterns(aspectPattern_names)
 		self.model = []
 		self.static_aspects_all = []
 
@@ -141,26 +141,33 @@ class Word2Vec_Predictor(Predictor):
 	def train(self):
 		pass
 
-	def predict(self, sentence, model, aspectPatterns, static_aspect_list, static_wordlist_vec, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0):
-		prediction, class_scores = predict_aspect_word2vec(sentence, model, aspectPatterns, static_aspect_list, static_wordlist_vec, criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold)
+	def predict(self, sentence, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0):
+		
+		static_aspect_list = self.static_aspects_all["static_aspect_list"]
+		static_wordlist_vec = static_aspect_to_vec(self.static_aspects_all, self.model)
+
+		prediction, class_scores = predict_aspect_word2vec(sentence, self.model, 
+			self.aspectPatterns, static_aspect_list, static_wordlist_vec, 
+			criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold)
 		return prediction, class_scores
 
 
-	def predict_for_sentences(self, sentences, aspectPattern_names = ['adj_nn','nn'], criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.4, ratio_threshold = 0):
+	def predict_for_sentences(self, sentences, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.4, ratio_threshold = 0):
 		
-		model = self.model
-		aspectPatterns = AspectPatterns(aspectPattern_names)
-		static_aspect_list = self.static_aspects_all["static_aspect_list"]
-		static_wordlist_vec = static_aspect_to_vec(self.static_aspects_all, model)
+		predictions = []
 		for sentence in sentences:
-			sentence.static_aspect, _ = self.predict(sentence, model, aspectPatterns, static_aspect_list, static_wordlist_vec, criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold)
+			sentence.static_aspect, _ = self.predict(sentence, criteria_for_choosing_class, 
+				similarity_measure, cp_threshold, ratio_threshold)
+			predictions.append(sentence.static_aspect)
+
+		return np.array(predictions)
 
 
 
 def loadTrainedPredictor(predictor_name):
 	
 	if predictor_name == 'MaxEntropy':
-		params_filename = 'lambda_opt_regu2.txt'
+		params_filename = 'lambda_opt_regu3.txt'
 		wordlist_filename = 'wordlist_dict_1.txt'
 		predictor = MaxEntropy_Predictor()
 		predictor.load(wordlist_filename, params_filename)
@@ -180,15 +187,15 @@ def main():
 
 if __name__ == '__main__':
 	# main()
-	productID = 'B00I8BICB2'
-	prod1_contents,_,_ = loadScraperDataFromDB(productID)
-	sentences_list = []
-	for con in prod1_contents:
-		sentences_list.append(Sentence(content=con))
+	# create test sentences
+	static_traning_data_dir = settings["static_training_data"]
+
+	# sentences = loadTrainingData(static_traning_data_dir)
+	sentences = loadUsefulTrainingData(static_traning_data_dir)
 
 	# testing for Word2Vec predictor
 	p = Word2Vec_Predictor()
 	p.load('text8.bin','word2vec_dict.txt')	
-	p.predict_for_sentences(sentences_list,aspectPattern_names = ['adj_nn','nn'], criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0)
-	for sentence in sentences_list:
+	p.predict_for_sentences(sentences, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0)
+	for sentence in sentences:
 		print sentence.static_aspect
