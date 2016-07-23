@@ -17,6 +17,9 @@ def home():
 
 @app.route('/scrape_reviews', methods=['GET', 'POST'])
 def scrape_reviews():
+	from time import sleep
+	sleep(3) 
+
 	if request.method == 'POST':
 		product_id = request.form["product_id"]
 		product_id2 = request.form["product_id2"]
@@ -82,4 +85,5 @@ def showBokehBoxResultWithTwoProductIds(product_id, product_id2):
 
 if __name__ == '__main__':
 	app.debug = True
-	app.run(host='0.0.0.0', port=80)
+	# app.run(host='0.0.0.0', port=80,threaded=True)
+	app.run(port=5000)

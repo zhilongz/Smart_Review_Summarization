@@ -5,7 +5,9 @@ function renderResult(d,tStatus, jqxhr){
 
     $("#resultLink")[0].href = resultUrl;
     $("#resultLink")[0].innerHTML = product_id+" srs result";
-
+    // document.getElementById("loader").style.display = "block";
+    $("#loader1").hide();
+    window.location = resultUrl;
 }
 
 function linspace(a,b,n) {
@@ -99,10 +101,13 @@ $("#input_form").submit(function(e){
         data: formData,
         async: true,
         success: function(data){
-            alert("Your summarization for " + data + " is ready!");
+            // alert("Your summarization for " + data + " is ready!");
             // run job
             id = data;
             renderResult(id);
+        },
+        beforeSend: function() {
+            $("#loader1").show();
         },
         cache: false,
         contentType: false,
@@ -114,6 +119,7 @@ $("#input_form").submit(function(e){
 $(document).ready(function(){
     $("#addInput2").click(function(e){
         $("#input2").show();
+        $("#loader1").show();
         var Summarize_Button = document.getElementById('Summarize');
         Summarize_Button.value= 'Compare';      
         $("main_section").css({"padding-bottom": "10px"});
@@ -126,3 +132,12 @@ $(document).ready(function(){
         e.preventDefault();
     });    
 });
+
+// $(document).ready(function($) {  
+
+// // site preloader -- also uncomment the div in the header and the css style for #preloader
+// $(window).load(function(){
+//     $('#preloader').fadeOut('slow',function(){$(this).remove();});
+// });
+
+// });
