@@ -9,10 +9,18 @@
         <script src="http://code.jquery.com/jquery-2.2.0.min.js" ></script>
         <link rel="stylesheet" href="static/default.css">
 </head>
+
 <body>
 
-<header><h1>Smart Review Summarization</h1></header>
+<div id="myMenu">
+  <div class="myWrapper">
+    <nav>
+    <a href="/"><img src="static/logo.png" height="63" width="130" /></a>
+    </nav>
+  </div>
+</div>
 
+<header><h1>Smart Review Summarization</h1></header>
 
 <div id="main_section" style="width:600px; margin:0 auto;">
 	<form name="input_form"
@@ -50,14 +58,19 @@
 	    <center>
 	    	<input type="submit" name="Summarize" id="Summarize"  value="Summarize" class="btn btn-default"/>
 		</center>
-	</form>
-	
 
+	</form>
+
+	<div class="loader" id="loader1" style="display:none;"></div>
+	<!-- <div id="loader1"> <img src="static/loader.gif" style="display:none;"></div> -->
 	<div id="progress"></div>
     <div id="result"><a id="resultLink" href=""></a></div>
 
+
 </div>
 <script src="static/run.js"></script>
+
+
 
 <footer>
 <a href="mailto:srs2016@gmail.com">Contact us</a>

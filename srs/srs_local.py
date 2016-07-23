@@ -55,12 +55,13 @@ def fill_in_db(product_id,predictor_name = 'MaxEntropy'):
 	else:
 		print "Filled in db before for {0}".format(product_id)
 		# scrape for current number of review 
-		num_review_current = scrape_number_review(product_id)
+		# num_review_current = scrape_number_review(product_id)
 		# query for number of reviews stored in db 
 		query_res = select_for_product_id(product_id)
 		num_review_db = len(query_res[0]["review_ids"])
 
-		if num_review_current > num_review_db and num_review_db < 30: 
+		# if num_review_current > num_review_db and num_review_db < 30: 
+		if num_review_db < 30: 
 			print "But not enough review in db, scrapping for more..."
 			# scrape contents
 			amazonScraper = createAmazonScraper()

@@ -170,7 +170,7 @@ def getWebPage(productID):
         # or generate random one: https://pypi.python.org/pypi/fake-useragent
     page = requests.get(url, headers=headers)
     while True:
-        sleep(int(random.random()*1+1)) # this is important not to be identified as Amazon
+        sleep(int(random.random()*2+1)) # this is important not to be identified as Amazon
         try: 
             doc = html.fromstring(page.content)
             return doc
