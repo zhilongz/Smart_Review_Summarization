@@ -10,20 +10,7 @@ def connect_to_db():
 	db = client['srs']
 	return client, db
 
-def query_for_product_metadata(product_id, db_product_metadata):
-	#query the product_metadata collection for product_id's metadata information
-	query_metadata = list(db_product_metadata.find({"product_id": product_id}))
-	product_name = []
-	category = []
-	if len(query_metadata) >0:
-		if 'product_name' in query_metadata[0]:
-			product_name = query_metadata[0]['product_name']
-		if 'category' in query_metadata[0]:
-			category = query_metadata[0]['category']
-
-	return product_name, category
-
-def upsert_review_for_product_id(review, db_product_collection, db_product_metadata):
+def upsert_review_for_product_id(review, db_product_collection, meta_dict):
 	#For each review, if it belongs to the category indicated by "category_name", add it to the product_collection in db
 	product_id = review['asin']
 	query_res = list(db_product_collection.find({"product_id": product_id}))
@@ -33,10 +20,11 @@ def upsert_review_for_product_id(review, db_product_collection, db_product_metad
 	review_id_new = review['reviewerID']
 	rating_new = review['overall']
 
-	query_review = list(db_product_collection.find({"$and":[{"product_id": product_id},{"review_ids": review_id_new}]}))
 	isfound = 0
-	if len(query_review) == 0:
-		product_name, category = query_for_product_metadata(product_id, db_product_metadata)
+	if product_id in meta_dict:
+		product = meta_dict[product_id]
+		product_name = product['product_name']
+		category = product['category']
 		if len(category) > 0:
 			isfound = 1
 			#if product already exists: add to the current product information
@@ -87,56 +75,47 @@ def upsert_review_for_product_id(review, db_product_collection, db_product_metad
 
 	return isfound
 
-def insert_product_metadata(product_metadata, category_name, db_product_metadata):
-	#input: product_metadata: metadata from the file parser; category_name: the category we want to add to the product_metadata collection
-	#create an item in the db's product_metadata collection, if the current product_metadata belongs to the category indicated by "category_name"
-	product_id = product_metadata['asin']
-	category = product_metadata['categories'][0]
-
-	if 'title' in product_metadata:
-		product_name = product_metadata['title']
-	else:
-		product_name = ""
-	isCategory = -1
-	for single_category in category:
-		if single_category.find(category_name) > -1:
-			isCamera = 1
-
-	if isCategory == 1:
-		query = {"product_id": product_id}
-		update_field = {
-		"product_name": product_name,
-			"category": category
-		}
-		db_product_metadata.update(query, {"$set": update_field}, True)
 	
 def parse(path):
 	g = gzip.open(path, 'r')
 	for l in g:
 		yield ast.literal_eval(l)
 
-def construct_product_metadata_collection(meta_file_path, category_name):
+def construct_metadata_dict(meta_file_path, category_name):
 	metaParser = parse(meta_file_path)
 	client, db = connect_to_db()
-	db_product_metadata = db.product_metadata
-
 	i=0
+	j=0
+	meta_dict = {}
+	print "building the dict for product metadata"
 	for meta in metaParser:
-		insert_product_metadata(meta, category_name, db_product_metadata)
 		i+=1
 		if i%1000 == 0:
-			print i
+			print i, j
+		category = meta['categories'][0]
 
-def upsert_all_reviews(review_file_path):
+		if category_name in category or len(category_name) == 0:
+			j += 1
+			product_id = meta['asin']
+			if 'title' in meta:
+				product_name = meta['title']
+			else:
+				product_name = ""
+
+			meta_dict[product_id]={'category': category, 'product_name':product_name}
+		
+	return meta_dict
+
+def upsert_all_reviews(review_file_path, meta_dict):
 	reviewParser = parse(review_file_path)
 	client, db = connect_to_db()
 	db_product_collection = db.product_collection
-	db_product_metadata = db.product_metadata
 
 	i=0
 	num_found = 0
+	print "building product_collection in database"
 	for review in reviewParser:
-		isfound = upsert_review_for_product_id(review, db_product_collection, db_product_metadata)
+		isfound = upsert_review_for_product_id(review, db_product_collection, meta_dict)
 		num_found += isfound
 		i+=1
 		if i%100 == 0:
@@ -208,17 +187,17 @@ def statisitcs():
 def main():
 	Electronics_Review_Path = '../../Datasets/Full_Reviews/reviews_Electronics.json.gz'
 	Electronics_Meta_Path = '../../Datasets/Full_Reviews/meta_Electronics.json.gz'
-	category_name = "Digital Cameras"
+	category_name = 'Digital Cameras'
 	predictor_name = 'Word2Vec'
 	
-	#Construct the product_metadata collection in db that belongs to "category_name"
-	# construct_product_metadata_collection(Electronics_Meta_Path, category_name)
+	#Construct the meta_dict that stores product information that belongs to "category_name"
+	meta_dict = construct_metadata_dict(Electronics_Meta_Path, category_name)
 
 	#Add all reviews to product_collection that belongs to "category_name"
-	# upsert_all_reviews(Electronics_Review_Path)
+	# upsert_all_reviews(Electronics_Review_Path, meta_dict)
 
 	#Calculate the ft_dict for all products:
-	calculate_ft_dict_for_all_products(predictor_name)
+	# calculate_ft_dict_for_all_products(predictor_name)
 
 
 if __name__ == '__main__':
