@@ -57,9 +57,7 @@ def distill_dynamic(sentence, aspectPatterns):
 
 def distill_dynamic_sentencelist(sentence_list, aspectPatterns):
 	for sentence in sentence_list:
-		if not sentence.pos_tagged_tokens:
-			sentence.pos_tag()
-		sentence.word2vec_matchDaynamicAspectPatterns(aspectPatterns.aspectPatterns_list)
+		distill_dynamic(sentence, aspectPatterns)
 
 
 def static_aspect_to_vec(static_aspects_all, model):
