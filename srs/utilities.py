@@ -91,6 +91,11 @@ def loadTrainingDataFromFile(file_name):
         for line in f.readlines():
             line_splitted = line.split('***')
             sentences.append(Sentence(content=line_splitted[1],labeled_aspects=line_splitted[0]))
+    
+    for sent in sentences:
+        if sent.labeled_aspects in ['other features']:
+            sent.labeled_aspects = 'no feature'
+
     return sentences 
 
 def loadScraperDataFromFile(file_name): 
