@@ -74,6 +74,44 @@ def static_aspect_to_vec(static_aspects_all, model):
 
 	return static_wordlist_vec
 
+def getCosineDistanceFeatureVector(sentence, aspectPatterns, model, static_aspects_all, static_seedwords_vec):
+	
+	distill_dynamic(sentence, aspectPatterns)
+
+	aspect_phrases = []
+	for item in sentence.word2vec_features_list:
+		aspect_phrases = aspect_phrases + item
+	
+	sentence_vec_list=[]
+	for aspect_phrase in aspect_phrases:
+		aspect_words = aspect_phrase.split(' ')
+		aspect_phrase_vec=[]
+		for aspect_word in aspect_words:
+			if aspect_word in model:
+				aspect_word_vec = model[aspect_word]
+				aspect_phrase_vec.append(aspect_word_vec)
+		if aspect_phrase_vec:
+			sentence_vec_list.append(aspect_phrase_vec)
+
+	num_static_aspect = len(static_aspects_all['static_aspect_list_fortraining'])
+	num_aspect_phrase = len(sentence_vec_list)
+	similarity_matrix=np.zeros([num_aspect_phrase, num_static_aspect]) if num_aspect_phrase>=1 else np.zeros([1, num_static_aspect])
+	for i in range(num_aspect_phrase):
+		for j in range(num_static_aspect):
+			num_aspect_words_in_phrase =  len(sentence_vec_list[i])  
+			num_seedwords_in_static_aspect = len(static_seedwords_vec[j])
+			similarity_inner_matrix=np.zeros([num_aspect_words_in_phrase, num_seedwords_in_static_aspect])
+			for kk in range(num_aspect_words_in_phrase):
+				for ll in range(num_seedwords_in_static_aspect):
+					similarity_inner_matrix[kk][ll]=np.dot(sentence_vec_list[i][kk],static_seedwords_vec[j][ll])
+
+			similarity_inner_row=np.max(similarity_inner_matrix, axis=1)
+			similarity_inner=np.sum(similarity_inner_row)
+			similarity_matrix[i][j]=similarity_inner
+
+	useful_features_vec = np.max(similarity_matrix, axis=0)
+
+	return useful_features_vec
 
 def predict_aspect_word2vec(sentence, model, aspectPatterns, static_aspect_list, static_wordlist_vec, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0):
 	# aspectPattern_namelist: 'adj_nn': all adj+nn and nn+nn; 'nn': all nn; adj: all adj; adv: all adv
