@@ -5,19 +5,10 @@ import numpy as np
 import word2vec
 from abc import ABCMeta, abstractmethod
 from maxEntropyModel import cond_prob, loadWordListDict, train
-from word2VecModel import AspectPatterns, predict_aspect_word2vec, static_aspect_to_vec, distill_dynamic, getCosineDistanceFeatureVector
+from word2VecModel import AspectPatterns, predict_aspect_word2vec, static_aspect_to_vec, distill_dynamic, getCosineSimilarityVector
 from utilities import loadUsefulTrainingData, loadScraperDataFromDB, Sentence
 from srs import settings
 from sklearn.externals import joblib
-
-
-def getPredictorDataFilePath(filename):
-		
-	predictor_datafile_path = os.path.join(settings["predictor_data"], filename)
-	if os.path.exists(predictor_datafile_path):
-		return predictor_datafile_path
-	else:
-		raise Exception("{} is not found!".format(predictor_datafile_path))
 
 #defining abstract class Predictor
 class Predictor(object):
@@ -130,61 +121,45 @@ class Word2Vec_Predictor(Predictor):
 		self.aspectPatterns = AspectPatterns(aspectPattern_names)
 		self.model = []
 		self.static_aspects_all = []
-		self.static_seedwords_vec = []
+		self.static_seedwords_vec = {}
 
 	def load(self, model_filename, word2vec_dict_filename):
 		model_file_path = getPredictorDataFilePath(model_filename)
 		word2vec_dict_path = getPredictorDataFilePath(word2vec_dict_filename)
 		self.model = word2vec.load(model_file_path)  #load word2vec model
-		file = open(word2vec_dict_path, 'r')
-		self.static_aspects_all = json.load(file)
-		file.close()
+		with open(word2vec_dict_path, 'r') as file:
+			self.static_aspects_all = json.load(file)
 
 		self.static_seedwords_vec = static_aspect_to_vec(self.static_aspects_all, self.model)
 
 	def train(self):
 		pass
 
-	def predict(self, sentence, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0):
+	def predict(self, sentence):
 		
-		static_aspect_list = self.static_aspects_all["static_aspect_list"]
-		
-
-		prediction, class_scores = predict_aspect_word2vec(sentence, self.model, 
-			self.aspectPatterns, static_aspect_list, static_seedwords_vec, 
-			criteria_for_choosing_class, similarity_measure, cp_threshold, ratio_threshold)
-		return prediction, class_scores
+		prediction, _ = predict_aspect_word2vec(sentence, self.model, 
+			self.aspectPatterns, self.static_seedwords_vec)
+		return prediction
 
 
-	def predict_for_sentences(self, sentences, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.4, ratio_threshold = 0):
+	def predict_for_sentences(self, sentences):
 		
 		predictions = []
 		for sentence in sentences:
-			sentence.static_aspect, _ = self.predict(sentence, criteria_for_choosing_class, 
-				similarity_measure, cp_threshold, ratio_threshold)
+			sentence.static_aspect = self.predict(sentence)
 			predictions.append(sentence.static_aspect)
 
 		return np.array(predictions)
 
-class Word2Vec_svm_Predictor(Predictor):
+class Word2Vec_svm_Predictor(Word2Vec_Predictor):
 	def __init__(self, aspectPattern_names=['adj_nn','nn']):
-		self.aspectPatterns = AspectPatterns(aspectPattern_names)
-		self.model = []
-		self.static_aspects_all = []
+		super(Word2Vec_svm_Predictor, self).__init__(aspectPattern_names)
 		self.svm = None
-		self.static_seedwords_vec = []
 
 	def load(self, model_filename, word2vec_dict_filename, svm_filename):
-		model_file_path = getPredictorDataFilePath(model_filename)
-		word2vec_dict_path = getPredictorDataFilePath(word2vec_dict_filename)
+		super(Word2Vec_svm_Predictor, self).load(model_filename, word2vec_dict_filename)
 		svm_path = getPredictorDataFilePath(svm_filename)
-		self.model = word2vec.load(model_file_path)  #load word2vec model
-		file = open(word2vec_dict_path, 'r')
-		self.static_aspects_all = json.load(file)
-		file.close()
-
 		self.svm = joblib.load(svm_path)
-		self.static_seedwords_vec = static_aspect_to_vec(self.static_aspects_all, self.model) 
 
 	def train(self):
 		pass
@@ -192,11 +167,11 @@ class Word2Vec_svm_Predictor(Predictor):
 	def predict(self, sentence):
 		
 		# transform sentence into a vec
-		useful_features_vec = getCosineDistanceFeatureVector(sentence, 
-			self.aspectPatterns, self.model, self.static_aspects_all, self.static_seedwords_vec)
+		similarity_vec = getCosineSimilarityFeatureVector(sentence, 
+			self.aspectPatterns, self.model, self.static_seedwords_vec)
 
 		# use svm to map vec to a label
-		prediction = self.svm.predict(useful_features_vec.reshape(1, -1))[0]
+		prediction = self.svm.predict(similarity_vec.reshape(1, -1))[0]
 
 		return prediction
 
@@ -210,6 +185,13 @@ class Word2Vec_svm_Predictor(Predictor):
 
 		return np.array(predictions)
 
+def getPredictorDataFilePath(filename):
+		
+	predictor_datafile_path = os.path.join(settings["predictor_data"], filename)
+	if os.path.exists(predictor_datafile_path):
+		return predictor_datafile_path
+	else:
+		raise Exception("{} is not found!".format(predictor_datafile_path))
 
 
 def loadTrainedPredictor(predictor_name):
@@ -238,8 +220,9 @@ if __name__ == '__main__':
 	sentences = loadUsefulTrainingData(static_traning_data_dir)
 
 	# testing for Word2Vec predictor
-	p = loadTrainedPredictor('Word2Vec_svm')	
+	p = loadTrainedPredictor('Word2Vec')	
 	
-	for sentence in sentences:
-		print sentence.content
-		print p.predict(sentence)
+	sentence = sentences[0]
+	print sentence.content
+	print p.predict(sentence)
+	print sentence.labeled_aspects

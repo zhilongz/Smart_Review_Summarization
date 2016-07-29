@@ -62,138 +62,132 @@ def distill_dynamic_sentencelist(sentence_list, aspectPatterns):
 
 def static_aspect_to_vec(static_aspects_all, model):
 	wordlist_dic = static_aspects_all['wordlist_dic']
-	static_aspect_list_show = static_aspects_all['static_aspect_list_show']
-	static_aspect_list_fortraining = static_aspects_all['static_aspect_list_fortraining']
 
-	num_useful=len(static_aspect_list_fortraining)
-	static_wordlist_vec=[[] for i in range(num_useful)]
-	for i in range(num_useful):
-		for word in wordlist_dic[static_aspect_list_show[i]]:
+	static_seedwords_vec={}
+	for static_aspect, seedwords in wordlist_dic.iteritems(): 
+		for word in seedwords:
 			if word in model:
-				static_wordlist_vec[i].append(model[word])
+				if static_aspect in static_seedwords_vec:
+					static_seedwords_vec[static_aspect].append(model[word])
+				else:
+					static_seedwords_vec[static_aspect] = [model[word]]
 
-	return static_wordlist_vec
+	return static_seedwords_vec
 
-def getCosineDistanceFeatureVector(sentence, aspectPatterns, model, static_aspects_all, static_seedwords_vec):
-	
+def getPhraseWordVectorsList(sentence, aspectPatterns, word2vecModel):
+
+	# match aspect patterns
 	distill_dynamic(sentence, aspectPatterns)
 
-	aspect_phrases = []
+	phrases = []
 	for item in sentence.word2vec_features_list:
-		aspect_phrases = aspect_phrases + item
+		phrases = phrases + item
 	
-	sentence_vec_list=[]
-	for aspect_phrase in aspect_phrases:
-		aspect_words = aspect_phrase.split(' ')
-		aspect_phrase_vec=[]
-		for aspect_word in aspect_words:
-			if aspect_word in model:
-				aspect_word_vec = model[aspect_word]
-				aspect_phrase_vec.append(aspect_word_vec)
-		if aspect_phrase_vec:
-			sentence_vec_list.append(aspect_phrase_vec)
+	phrasewordVecs_list=[]
+	for phrase in phrases:
+		phraseWords = phrase.split(' ')
+		phraseWordVecs=[]
+		for phraseWord in phraseWords:
+			if phraseWord in word2vecModel:
+				phrasewordVec = word2vecModel[phraseWord]
+				phraseWordVecs.append(phrasewordVec)
+		if phraseWordVecs:
+			phrasewordVecs_list.append(phraseWordVecs)
 
-	num_static_aspect = len(static_aspects_all['static_aspect_list_fortraining'])
-	num_aspect_phrase = len(sentence_vec_list)
-	similarity_matrix=np.zeros([num_aspect_phrase, num_static_aspect]) if num_aspect_phrase>=1 else np.zeros([1, num_static_aspect])
-	for i in range(num_aspect_phrase):
+	return phrasewordVecs_list
+
+def getPhraseAspectCosineSimilarityMatrix(phrasewordVecs_list, static_seedwords_vec, similarity_measure='max'):
+
+	num_static_aspect = len(static_seedwords_vec)
+	static_aspects = sorted(static_seedwords_vec.keys())
+
+	num_phrase = len(phrasewordVecs_list)
+	similarity_matrix=np.zeros([num_phrase, num_static_aspect]) if num_phrase>=1 else np.zeros([1, num_static_aspect])
+	for i, phrasewordVecs in enumerate(phrasewordVecs_list):
+			for j, static_aspect in enumerate(static_aspects):
+				seedwordVecs = static_seedwords_vec[static_aspect]
+				similarity_inner_matrix=np.zeros([len(phrasewordVecs),len(seedwordVecs)])
+				for ii, phrasewordVec in enumerate(phrasewordVecs):
+					for jj, seedwordVec in enumerate(seedwordVecs):
+						similarity_inner_matrix[ii][jj]=np.dot(phrasewordVec,seedwordVec)
+
+				if similarity_measure == 'max':
+					similarity_inner_row=np.max(similarity_inner_matrix, axis=1)
+					similarity_inner=np.sum(similarity_inner_row)
+				elif similarity_measure == 'sum_row_max':
+					similarity_inner_row=np.max(similarity_inner_matrix,axis=1)
+					similarity_inner=np.sum(similarity_inner_row)
+				elif similarity_measure == 'max_column_mean':
+					similarity_inner_column=np.mean(similarity_inner_matrix,axis=0)
+					similarity_inner=np.max(similarity_inner_column)
+				elif similarity_measure == 'mean':
+					similarity_inner=np.mean(similarity_inner_matrix)
+
+				similarity_matrix[i][j]=similarity_inner
+
+	return similarity_matrix
+
+def getSimilarityVectorFromSimilarityMatrix(similarity_matrix, criteria='max'):
+
+	num_static_aspect = similarity_matrix.shape[1]
+	similarity_vec=[0 for j in range(num_static_aspect)]
+	if criteria == 'max':
 		for j in range(num_static_aspect):
-			num_aspect_words_in_phrase =  len(sentence_vec_list[i])  
-			num_seedwords_in_static_aspect = len(static_seedwords_vec[j])
-			similarity_inner_matrix=np.zeros([num_aspect_words_in_phrase, num_seedwords_in_static_aspect])
-			for kk in range(num_aspect_words_in_phrase):
-				for ll in range(num_seedwords_in_static_aspect):
-					similarity_inner_matrix[kk][ll]=np.dot(sentence_vec_list[i][kk],static_seedwords_vec[j][ll])
+			similarity_vec[j]=np.max(similarity_matrix[:,j])
+	elif criteria == 'sum':
+		for j in range(num_static_aspect):
+			similarity_vec[j]=np.sum(similarity_matrix[:,j])
+	elif criteria == 'sum_max':
+		similarity_maxmatching_matrix=np.zeros([len(phrasewordVecs_list),num_static_aspect])
+		for i in range(len(phrasewordVecs_list)):
+			k=0
+			max_k=0
+			for j in range(num_static_aspect):
+				if similarity_matrix[i,j]>max_k:
+					k=j
+					max_k=similarity_matrix[i,j]
+			similarity_maxmatching_matrix[i,k]=max_k
+		for j in range(num_static_aspect):
+			similarity_vec[j]=np.sum(similarity_maxmatching_matrix[:,j])
 
-			similarity_inner_row=np.max(similarity_inner_matrix, axis=1)
-			similarity_inner=np.sum(similarity_inner_row)
-			similarity_matrix[i][j]=similarity_inner
+	return similarity_vec
 
-	useful_features_vec = np.max(similarity_matrix, axis=0)
 
-	return useful_features_vec
+def getCosineSimilarityVector(sentence, aspectPatterns, word2vecModel, static_seedwords_vec):
+	
+	phrasewordVecs_list = getPhraseWordVectorsList(sentence, aspectPatterns, word2vecModel)
 
-def predict_aspect_word2vec(sentence, model, aspectPatterns, static_aspect_list, static_wordlist_vec, criteria_for_choosing_class = "max", similarity_measure = "max", cp_threshold = 0.85, ratio_threshold = 0):
+	if phrasewordVecs_list:
+		similarity_matrix = getPhraseAspectCosineSimilarityMatrix(phrasewordVecs_list, static_seedwords_vec)
+		similarity_vec = getSimilarityVectorFromSimilarityMatrix(similarity_matrix, criteria='max')
+	else:
+		similarity_vec = np.zeros(len(static_seedwords_vec))
+
+	return similarity_vec
+
+def predict_aspect_word2vec(sentence, word2vecModel, aspectPatterns, static_seedwords_vec, cp_threshold = 0.85, ratio_threshold = 0):
 	# aspectPattern_namelist: 'adj_nn': all adj+nn and nn+nn; 'nn': all nn; adj: all adj; adv: all adv
-	# criteria_for_choosing_class: choose from 'max', 'sum', 'sum_max'. See explanation below
-	# similarity_measure:  choose from 'max', 'sum_row_max', 'max_column_mean','mean'. See explanation below
 	# cp_threshold: the threshold for the top class's similarity, for a sentence to be classified as useful
 	# ratio_threshold: the threshold for the ratio between top and second class's similarity, for a sentence to be classified as useful
 
-	num_static_aspect=len(static_wordlist_vec)
-	distill_dynamic(sentence, aspectPatterns) #distill the sentence's dynamic aspects
-
-	#transform the sentence's word2vec_features to vectors
-	word2vec_features = []
-	for item in sentence.word2vec_features_list:
-		word2vec_features=word2vec_features + item
-	vec_list=[]
-	for dynamic_aspect in word2vec_features:
-		dynamic_aspect_splitted=dynamic_aspect.split(' ')
-		aspect_phrase_vec=[]
-		for aspect in dynamic_aspect_splitted:
-			if aspect in model:
-				aspect_word_vec=model[aspect]
-				aspect_phrase_vec.append(aspect_word_vec)
-		if aspect_phrase_vec:
-			vec_list.append(aspect_phrase_vec)	
+	phrasewordVecs_list = getPhraseWordVectorsList(sentence, aspectPatterns, word2vecModel)	
 	
-	#calculating vector distance of the dynamic aspects to each phrase in the static aspect:
-	#similarity_matrix is the similarity matrix, and (i,j) entry is the similarity between the i th word in the dynamic aspect and the j th word in the static aspect.
-	if vec_list:
-		similarity_matrix=np.zeros([len(vec_list),num_static_aspect])
-		for i in range(len(vec_list)):
-			for j in range(num_static_aspect):			   
-				similarity_item_matrix=np.zeros([len(vec_list[i]),len(static_wordlist_vec[j])])
-				for kk in range(len(vec_list[i])):
-					for ll in range(len(static_wordlist_vec[j])):
-						similarity_item_matrix[kk][ll]=np.dot(vec_list[i][kk],static_wordlist_vec[j][ll])
-				if similarity_measure == 'max':
-					similarity_item=np.max(similarity_item_matrix)
-				elif similarity_measure == 'sum_row_max':
-					similarity_item_row=np.max(similarity_item_matrix,axis=1)
-					similarity_item=np.sum(similarity_item_row)
-				elif similarity_measure == 'max_column_mean':
-					similarity_item_column=np.mean(similarity_item_matrix,axis=0)
-					similarity_item=np.max(similarity_item_column)
-				elif similarity_measure == 'mean':
-					similarity_item=np.mean(similarity_item_matrix)
-				similarity_matrix[i][j]=similarity_item
+	if phrasewordVecs_list:
+		similarity_matrix = getPhraseAspectCosineSimilarityMatrix(phrasewordVecs_list, static_seedwords_vec)
 
-		# criteria_for_choosing_class: 'max': choose the class that has the highest max similarity with any of the dynamic aspects;   'sum': choose the class that has the highest sum similarity with dynamic aspect list;  'sum_max': for any dynamic aspect, only preserve its highest similarity class, and choose the class that has the highest sum
-		similarity_catagory=[0 for j in range(num_static_aspect)]
-		if criteria_for_choosing_class == 'max':
-			for j in range(num_static_aspect):
-				similarity_catagory[j]=np.max(similarity_matrix[:,j])
-		if criteria_for_choosing_class == 'sum':
-			for j in range(num_static_aspect):
-				similarity_catagory[j]=np.sum(similarity_matrix[:,j])
-		if criteria_for_choosing_class == 'sum_max':
-			similarity_maxmatching_matrix=np.zeros([len(vec_list),num_static_aspect])
-			for i in range(len(vec_list)):
-				k=0
-				max_k=0
-				for j in range(num_static_aspect):
-					if similarity_matrix[i,j]>max_k:
-						k=j
-						max_k=similarity_matrix[i,j]
-				similarity_maxmatching_matrix[i,k]=max_k
-			for j in range(num_static_aspect):
-				similarity_catagory[j]=np.sum(similarity_maxmatching_matrix[:,j])
+		similarity_vec = getSimilarityVectorFromSimilarityMatrix(similarity_matrix)
 
 		# Sort the sentence's similarity to each class
-		similarity_list_sorted,static_aspect_list_sorted = (list(x) for x in zip(*sorted(zip(similarity_catagory, static_aspect_list), reverse=True)))
-		sim_whole_list_sorted=[]
-		for i in range(num_static_aspect):
-			item=(static_aspect_list_sorted[i],round(similarity_list_sorted[i],4))
-			sim_whole_list_sorted.append(item)
-		if sim_whole_list_sorted[0][1]>cp_threshold:
-			if sim_whole_list_sorted[1][1]!=0 and sim_whole_list_sorted[0][1]/sim_whole_list_sorted[1][1]>=ratio_threshold:
-				prediction=sim_whole_list_sorted[0][0]
-			elif sim_whole_list_sorted[1][1]==0 and sim_whole_list_sorted[0][1]!=0:
-				prediction=sim_whole_list_sorted[0][0]
-			else: prediction='useless'
-		else: prediction='useless'
-		return (prediction,sim_whole_list_sorted)
+		static_aspects = sorted(static_seedwords_vec.keys())
+		aspect_similarity_tups_sorted = sorted(zip(static_aspects, similarity_vec), 
+			key=lambda tup: tup[1], reverse=True)
+		if aspect_similarity_tups_sorted[0][1]>cp_threshold:
+			if aspect_similarity_tups_sorted[1][1]!=0 and aspect_similarity_tups_sorted[0][1]/aspect_similarity_tups_sorted[1][1]>=ratio_threshold:
+				prediction=aspect_similarity_tups_sorted[0][0]
+			elif aspect_similarity_tups_sorted[1][1]==0 and aspect_similarity_tups_sorted[0][1]!=0:
+				prediction=aspect_similarity_tups_sorted[0][0]
+			else: prediction='no feature'
+		else: prediction='no feature'
+		return (prediction,aspect_similarity_tups_sorted)
 	else:
-		return ('useless',[])
+		return ('no feature',[])
