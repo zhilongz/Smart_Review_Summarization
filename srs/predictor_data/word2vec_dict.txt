@@ -1,9 +1,3 @@
 {
-"wordlist_dic": {"battery": ["charge", "battery", "charger", "external"], "price": ["price", "expensive", "cheap"], "ease of use": ["easy", "use", "ease", "lightweight"], "detection": ["focus", "shot", "flash", "mode", "auto", "red", "eye"], "video": ["video", "movie", "record"], "quality": ["quality"], "size": ["size", "lightweight", "easy", "carry", "fit", "compact"], "pictures": ["picture", "pictures", "image", "clear"], "zoom": ["zoom", "len", "optic"], "design": ["color", "size", "fast"], "screen": ["screen", "touch"]}, 
-
-"static_aspect_list": ["price", "pictures", "video", "zoom", "size", "design", "battery", "screen", "detection", "ease of use", "quality", "other features", "no feature"], 
-
-"static_aspect_list_show": ["price", "pictures", "video", "zoom", "size", "design", "battery", "screen", "detection", "ease of use", "quality", "useless"], 
-
-"static_aspect_list_fortraining": ["price", "pictures", "video", "zoom", "size", "design", "battery", "screen", "detection", "ease use", "quality"]
+"wordlist_dic": {"battery": ["charge", "battery", "charger", "external"], "price": ["price", "expensive", "cheap"], "ease of use": ["easy", "use", "ease", "lightweight"], "detection": ["focus", "shot", "flash", "mode", "auto", "red", "eye"], "video": ["video", "movie", "record"], "quality": ["quality"], "size": ["size", "lightweight", "easy", "carry", "fit", "compact"], "pictures": ["picture", "pictures", "image", "clear"], "zoom": ["zoom", "len", "optic"], "design": ["color", "size", "fast"], "screen": ["screen", "touch"]}
 }
