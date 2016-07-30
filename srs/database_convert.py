@@ -11,7 +11,7 @@ def connect_to_db():
 	return client, db
 
 def upsert_review_for_product_id(review, db_product_collection, meta_dict):
-	#For each review, if it belongs to the category indicated by "category_name", add it to the product_collection in db
+	"""For each review, if it belongs to the category indicated by "category_name", add it to the product_collection in db"""
 	product_id = review['asin']
 	query_res = list(db_product_collection.find({"product_id": product_id}))
 
@@ -82,6 +82,7 @@ def parse(path):
 		yield ast.literal_eval(l)
 
 def construct_metadata_dict(meta_file_path, category_name):
+	"""return a dictionary for product metadata"""
 	metaParser = parse(meta_file_path)
 	client, db = connect_to_db()
 	i=0
@@ -121,6 +122,99 @@ def upsert_all_reviews(review_file_path, meta_dict):
 		if i%100 == 0:
 			print i, num_found
 	client.close()
+
+def upsert_new_product(db_product_collection, product_id, product_name, category, contents_new, review_ids_new, ratings_new, review_ending_sentence_new, num_reviews_new, ft_senIdx, ft_score):
+	"""upsert product information """
+	query_res = list(db_product_collection.find({"product_id": product_id}))
+	if len(query_res) > 0:
+		contents = query_res[0]["contents"] + contents_new
+		num_sentence = len(contents)
+		review_ids = query_res[0]["review_ids"]
+		ratings = query_res[0]["ratings"]
+		review_ids += review_ids_new
+		ratings += ratings_new
+		review_ending_sentence = query_res[0]["review_ending_sentence"]
+		review_ending_sentence_new = [item + review_ending_sentence[-1] for item in review_ending_sentence_new]
+		review_ending_sentence += review_ending_sentence_new	
+		num_reviews = query_res[0]["num_reviews"] + num_reviews_new
+
+	elif len(query_res) == 0:
+		contents = contents_new
+		review_ids = review_ids_new
+		ratings = ratings_new
+		review_ending_sentence = review_ending_sentence_new
+		num_reviews = num_reviews_new
+
+	query = {"product_id": product_id}
+	update_field = {
+		"product_name": product_name,
+		"category": category,
+		"contents": contents,
+		"review_ids": review_ids,
+		"ratings": ratings,
+		"review_ending_sentence": review_ending_sentence,
+		"num_reviews": num_reviews,	
+		"ft_senIdx": ft_senIdx,
+		"ft_score": ft_score
+	}
+	db_product_collection.update(query, {"$set": update_field}, True)
+
+
+def upsert_all_reviews_bulk(review_file_path, meta_dict):
+	"""Based on the fact that a product's review is consecutive, this function bulk upsert all the reviews for one product"""
+	reviewParser = parse(review_file_path)
+	client, db = connect_to_db()
+	db_product_collection = db.product_collection
+
+	i=0
+	num_found = 0
+	print "building product_collection in database"
+	product_id = "a"
+	for review in reviewParser:
+		i += 1
+		if i % 1000 ==0:
+			print i
+		#new data:
+		product_id_new = review['asin']
+		contents_new = getSentencesFromReview(review['reviewText'])
+		num_sentence = len(contents_new)
+		review_id_new = review['reviewerID']
+		rating_new = review['overall']
+
+		# If the product id is the same, then just concatenate the field
+		if product_id_new == product_id:
+			contents = contents + contents_new
+			review_ids.append(review_id_new)
+			ratings.append(rating_new)
+			review_ending_sentence.append(num_sentence + review_ending_sentence[-1])
+			num_reviews += 1
+
+		# If encountering new product: save previous product, and initialize the product variables
+		elif product_id_new != product_id:
+			if i > 1:
+				upsert_new_product(db_product_collection, product_id, product_name, category, contents, review_ids, ratings, review_ending_sentence, num_reviews, ft_senIdx, ft_score)
+			product_id = product_id_new
+			product_name = []
+			category = []
+			if product_id in meta_dict:
+				product = meta_dict[product_id]			
+				if 'product_name' in product:
+					product_name = product['product_name']
+				if 'category' in product:
+					category = product['category']		
+			contents = contents_new
+			review_ids = []
+			ratings = []
+			review_ending_sentence = []
+			review_ids.append(review_id_new)
+			ratings.append(rating_new)
+			review_ending_sentence.append(num_sentence)
+			num_reviews = 1
+			ft_score = {}
+			ft_senIdx = {}
+
+	client.close()
+
 
 def calculate_ft_dict_for_all_products(predictor_name):
 	predictor = loadTrainedPredictor()
@@ -187,14 +281,14 @@ def statisitcs():
 def main():
 	Electronics_Review_Path = '../../Datasets/Full_Reviews/reviews_Electronics.json.gz'
 	Electronics_Meta_Path = '../../Datasets/Full_Reviews/meta_Electronics.json.gz'
-	category_name = 'Digital Cameras'
+	category_name = []
 	predictor_name = 'Word2Vec'
 	
 	#Construct the meta_dict that stores product information that belongs to "category_name"
 	meta_dict = construct_metadata_dict(Electronics_Meta_Path, category_name)
 
 	#Add all reviews to product_collection that belongs to "category_name"
-	# upsert_all_reviews(Electronics_Review_Path, meta_dict)
+	upsert_all_reviews_bulk(Electronics_Review_Path, meta_dict)
 
 	#Calculate the ft_dict for all products:
 	# calculate_ft_dict_for_all_products(predictor_name)
