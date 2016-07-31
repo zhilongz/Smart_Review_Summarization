@@ -49,7 +49,7 @@ function fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data
 
 
     if (typeof current_index != 'undefined'){
-        console.log(current_index);
+        // console.log(current_index);
 
         feature = features[current_index];
 
@@ -77,9 +77,8 @@ function fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data
         histPlot_data2['right']= histRight2;
         histPlot_data2['feature'] = feature;
 
-        console.log(feature);
+        // console.log(feature);
         $("#histPlotTitle p").text(feature); 
-        
     }
 }
 function fillSampleReviews(cb_data, sampleSentences_dict, feature) {

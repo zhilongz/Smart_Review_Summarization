@@ -67,7 +67,7 @@ def showBokehBoxResultWithProductId(product_id):
 
 	# create the HTML elements to pass to template
 	figJS,figDivs = components(plots)
-	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
+	return render_template('srs_result_box_bokeh.html', prod1Title='Canon', dsp='None', figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
 
 @app.route('/srs_result_box_bokeh/<product_id>&<product_id2>')
 def showBokehBoxResultWithTwoProductIds(product_id, product_id2):
@@ -81,7 +81,7 @@ def showBokehBoxResultWithTwoProductIds(product_id, product_id2):
 
 	# create the HTML elements to pass to template
 	figJS,figDivs = components(plots)
-	return render_template('srs_result_box_bokeh.html', figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
+	return render_template('srs_result_box_bokeh.html', prod1Title='Canon',dsp='block', prod2Title='Nikon',figJS=figJS,figDiv=figDivs[0],figDiv2=figDivs[1])
 
 if __name__ == '__main__':
 	app.debug = True

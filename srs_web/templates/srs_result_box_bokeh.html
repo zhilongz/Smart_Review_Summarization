@@ -26,18 +26,21 @@
 	</ul>
 
 		<header id="pageHeader"><h1>Smart Review Summarization</h1></header>
-		<header id="pageHeader"><h2></h2></header>
+<!-- 		<header id="pageHeader"><h2></h2></header>
+ -->
+		<div id="legendWrap" class="legend">
+			<div id="box1" class="box" style="background-color:#4286F5;" >
+				<p id="prod1Legend" class="legend_text" align="left">
+				{{prod1Title}}
+				</p>
+			</div>
 
-		<p id="prod1Legend" class="legend" align="right">
-			<div id="box" style="background-color:#4286F5;" >&nbsp;</div>
-			Product 1 Title 
-		</p>
-
-		<p id="prod2Legend" class="legend" align="right" style="font-size: 160%;">
-			<div id="box" style="background-color:#DC4439">&nbsp;</div>
-			Product 2 Title 
-		</p>
-
+			<div id="box2" class="box" style="margin-bottom: 0px; background-color:#DC4439;display:{{dsp}};" >
+				<p id="prod2Legend" class="legend_text" align="left">
+				{{prod2Title}}
+				</p>
+			</div>
+		</div>
 
 		<div id="AspectsPlot">{{ figDiv|safe }}</div>
 		

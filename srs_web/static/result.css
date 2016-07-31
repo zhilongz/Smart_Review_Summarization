@@ -13,18 +13,21 @@ h2{
 }
 
 p {
-  padding: 3px;
+  padding-bottom: 3px;
   margin: 1px;
   font-family: 'Roboto Condensed', sans-serif;
 }
 
 .legend {
-    width: 200px;
+  padding-left: 100px;
+}
+.legend_text {
+    width: 120px;
+    padding-left: 25px;
 }
 
-#box {
-    float: left;
-    width: 40px;
+.box {
+    width: 20px;
     height: 20px;
     background-color: #4286F5;
     margin: 0px 10px 10px 0px;
