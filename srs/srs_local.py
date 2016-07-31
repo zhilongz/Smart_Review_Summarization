@@ -17,7 +17,7 @@ def get_ft_dicts_from_contents(contents, predictor):
 	get_sentiment_score_for_sentences(sentences)
 	return get_ftScore_ftSenIdx_dicts(sentences)
 	
-def fill_in_db(product_id,predictor_name = 'Word2Vec_svm'):	
+def fill_in_db(product_id,predictor_name = 'MaxEntropy'):	
 	# fetch product info from db 
 	prod_contents, prod_ft_score_dict, prod_ft_senIdx_dict = loadScraperDataFromDB(product_id)
 
