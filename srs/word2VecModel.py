@@ -150,7 +150,7 @@ def getSimilarityVectorFromSimilarityMatrix(similarity_matrix, criteria='max'):
 		for j in range(num_static_aspect):
 			similarity_vec[j]=np.sum(similarity_maxmatching_matrix[:,j])
 
-	return similarity_vec
+	return np.array(similarity_vec)
 
 
 def getCosineSimilarityVector(sentence, aspectPatterns, word2vecModel, static_seedwords_vec):
