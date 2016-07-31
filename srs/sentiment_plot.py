@@ -137,12 +137,10 @@ def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.
 	color_list2 = [color2]*len(features2)	
 
 	rectPlot_rect1 = rectPlot.rect(features1, mids1, w, spans1, 
-		color=color_list1,alpha = 0.5,hover_color=hover_color1, hover_alpha=1.0,
-		legend = "Product 1")
+		color=color_list1,alpha = 0.5,hover_color=hover_color1, hover_alpha=1.0)
 
 	rectPlot_rect2 = rectPlot.rect(features2, mids2, w, spans2, 
-		color=color_list2, alpha = 0.5,hover_color=hover_color2, hover_alpha=1.0,
-		legend = "Product 2" )
+		color=color_list2, alpha = 0.5,hover_color=hover_color2, hover_alpha=1.0)
 
 	return rectPlot, rectPlot_rect1, rectPlot_rect2
 
