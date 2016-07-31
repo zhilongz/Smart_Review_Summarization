@@ -1,7 +1,7 @@
 from math import pi
 import pandas as pd
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool
+from bokeh.models import ColumnDataSource, TapTool, CustomJS, HoverTool, FixedTicker, PrintfTickFormatter
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -87,59 +87,66 @@ def prepareDataForHistPlotAndSampleSentences(
 
 	return hist_cds, sampleSentences_cds
 
-def getRectPlot(features, mids, spans, w=0.3, fill_color="#2ca25f", hover_color="#99d8c9",
+def getRectPlot(features, mids, spans, w=0.3, fill_color="#4286F5", hover_color="#4286F5",
 	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
 	
+	print features
 	feature_num = len(features)
 
 	color_list = [fill_color]*feature_num
 	# plot rectPlot
 	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, 
-		x_range=sorted(list(set(features))),y_axis_label="Sentiment Score")
+		x_range=sorted(list(set(features))),title="Review Sentiment",title_text_font_size='16pt')
 	rectPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.major_label_orientation = major_label_orientation
 	rectPlot.grid.grid_line_alpha=grid_line_alpha
 	rectPlot.logo = None
 	rectPlot.toolbar_location = None
-
-	rectPlot_rect=rectPlot.rect(features, mids, w, spans, color=color_list,hover_color=hover_color, hover_alpha=1.0)
+	rectPlot.yaxis[0].ticker=FixedTicker(ticks=[0])
+	rectPlot.yaxis[0].formatter = PrintfTickFormatter(format="Neutral")
+	# http://stackoverflow.com/questions/37173230/how-do-i-use-custom-labels-for-ticks-in-bokeh
+	# open issue allow users to specify explicit tick labels: https://github.com/bokeh/bokeh/issues/1671	
+	# rectPlot.text([1,1],[0.15,-0.05], text=['Positive','Negative'], alpha=1, text_font_size="12pt", text_baseline="middle", text_align="center")
+	rectPlot_rect=rectPlot.rect(features, mids, w, spans, color=color_list, alpha = 0.5, hover_color=hover_color, hover_alpha=1.0)
 
 	return rectPlot, rectPlot_rect
 
 def getRectPlot_compare(features1, mids1, spans1, features2, mids2, spans2, w=0.3,
- 	color1="#2ca25f",color2="#8856a7", hover_color1="#99d8c9",hover_color2="#9e9ac8",
+ 	color1="#4286F5",color2="#DC4439", hover_color1="#4286F5",hover_color2="#DC4439",
 	plot_width=650, plot_height=450, major_label_orientation=pi/4, 
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
 	
 	# plot rectPlot
 	rectPlot = figure(tools="", plot_width=plot_width, plot_height=plot_height, 
-		x_range=sorted(list(set(features1+features2))),y_axis_label="Sentiment Score")
+		x_range=sorted(list(set(features1+features2))),title="Review Sentiment",title_text_font_size='16pt')
 	rectPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
 	rectPlot.xaxis.major_label_orientation = major_label_orientation
 	rectPlot.grid.grid_line_alpha=grid_line_alpha
 	rectPlot.logo = None
 	rectPlot.toolbar_location = None
+	rectPlot.yaxis[0].ticker=FixedTicker(ticks=[0])
+	rectPlot.yaxis[0].formatter = PrintfTickFormatter(format="Neutral")
 
 	color_list1 = [color1]*len(features1)
 	color_list2 = [color2]*len(features2)	
 
 	rectPlot_rect1 = rectPlot.rect(features1, mids1, w, spans1, 
-		color=color_list1,hover_color=hover_color1, hover_alpha=1.0,
+		color=color_list1,alpha = 0.5,hover_color=hover_color1, hover_alpha=1.0,
 		legend = "Product 1")
 
 	rectPlot_rect2 = rectPlot.rect(features2, mids2, w, spans2, 
-		color=color_list2,hover_color=hover_color2, hover_alpha=1.0,
-		legend = "Product 2")
+		color=color_list2, alpha = 0.5,hover_color=hover_color2, hover_alpha=1.0,
+		legend = "Product 2" )
 
 	return rectPlot, rectPlot_rect1, rectPlot_rect2
 
-def getHistPlot(histPlot_cds, color="#99d8c9",
-	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
+def getHistPlot(histPlot_cds, color="#4286F5",
+	grid_line_alpha=0.5, axis_label_text_font_size='12pt'):
 
-	histPlot = figure(tools="", plot_width=400, plot_height=250,y_axis_label='Comments',x_axis_label="Sentiment Score")
+	histPlot = figure(tools="", plot_width=400, plot_height=250,y_axis_label='# of sentences',x_axis_label="Sentiment Score")
 	histPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
 	histPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
 	histPlot.logo = None
@@ -150,11 +157,11 @@ def getHistPlot(histPlot_cds, color="#99d8c9",
 
 	return histPlot, histPlot_quad
 
-def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#99d8c9",color2="#9e9ac8",
+def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#4286F5",color2="#DC4439",
 	grid_line_alpha=0.3, axis_label_text_font_size='12pt'):
 
 	histPlot = figure(tools="", plot_width=400, plot_height=250,
-		y_axis_label='Comments',x_axis_label="Sentiment Score")
+		y_axis_label='# of sentences',x_axis_label="Sentiment Score")
 	
 	histPlot.xaxis.axis_label_text_font_size = axis_label_text_font_size
 	histPlot.yaxis.axis_label_text_font_size = axis_label_text_font_size
@@ -163,10 +170,10 @@ def getHistPlot_compare(histPlot_cds1, histPlot_cds2, color1="#99d8c9",color2="#
 
 	# initialize plot
 	histPlot_quad1 = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
-		source=histPlot_cds1,line_width=2,fill_alpha=0.8,color=color1)
+		source=histPlot_cds1,line_width=2,fill_alpha=0.5,color=color1)
 
 	histPlot_quad2 = histPlot.quad(top='top',bottom='bottom',left='left',right='right', 
-		source=histPlot_cds2,line_width=2,fill_alpha=0.8,color=color2)
+		source=histPlot_cds2,line_width=2,fill_alpha=0.5,color=color2)
 
 	return histPlot, histPlot_quad1, histPlot_quad2
 

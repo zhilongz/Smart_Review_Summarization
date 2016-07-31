@@ -1,13 +1,13 @@
 function renderResult(d,tStatus, jqxhr){
-    $("#progress")[0].innerHTML = "Done! Please check your results below.";
+    $("#loader-wrapper").hide();
     product_id = d;
     var resultUrl = "/srs_result_box_bokeh/" + product_id;
-
-    $("#resultLink")[0].href = resultUrl;
-    $("#resultLink")[0].innerHTML = product_id+" srs result";
-    // document.getElementById("loader").style.display = "block";
-    $("#loader1").hide();
     window.location = resultUrl;
+
+    // $("#progress")[0].innerHTML = "Done! Please check your results below.";
+    // $("#resultLink")[0].href = resultUrl;
+    // $("#resultLink")[0].innerHTML = product_id+" srs result";
+    // document.getElementById("loader").style.display = "block";
 }
 
 function linspace(a,b,n) {
@@ -94,32 +94,46 @@ function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
 
 $("#input_form").submit(function(e){    
     var formData = new FormData($(this)[0]);
+    var user_input1 = document.forms['input_form'].elements['product_id'].value;
+    if (user_input1 == ""){
+        $.ajax({
+            type: "POST",
+            url: "/",
+            complete: function(){
+                $("#input_alert").show();
+            }
+        })
+        e.preventDefault();
+
+    }else{
     // create job
-    $.ajax({
-        type: "POST",
-        url: "/scrape_reviews",
-        data: formData,
-        async: true,
-        success: function(data){
-            // alert("Your summarization for " + data + " is ready!");
-            // run job
-            id = data;
-            renderResult(id);
-        },
-        beforeSend: function() {
-            $("#loader1").show();
-        },
-        cache: false,
-        contentType: false,
-        processData: false
-    })
-    e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/scrape_reviews",
+            data: formData,
+            async: true,
+            success: function(data){
+                // alert("Your summarization for " + data + " is ready!");
+                // run job
+                id = data;
+                renderResult(id);
+            },
+            beforeSend: function() {
+                // $("#loader1").show();
+                $("#input_alert").hide();
+                $("#loader-wrapper").show();
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        })
+        e.preventDefault();
+    }
 })
 
 $(document).ready(function(){
     $("#addInput2").click(function(e){
         $("#input2").show();
-        $("#loader1").show();
         var Summarize_Button = document.getElementById('Summarize');
         Summarize_Button.value= 'Compare';      
         $("main_section").css({"padding-bottom": "10px"});
@@ -132,12 +146,3 @@ $(document).ready(function(){
         e.preventDefault();
     });    
 });
-
-// $(document).ready(function($) {  
-
-// // site preloader -- also uncomment the div in the header and the css style for #preloader
-// $(window).load(function(){
-//     $('#preloader').fadeOut('slow',function(){$(this).remove();});
-// });
-
-// });
