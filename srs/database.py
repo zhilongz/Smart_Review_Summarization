@@ -86,7 +86,7 @@ def insert_for_product_id(product_id, contents, review_ids, ratings, num_reviews
 	product_collection.save(product_document)
 	client.close()
 
-def upsert_contents_for_product_id(product_id, contents, review_ids, ratings, num_reviews, ft_score=None, ft_senIdx=None):
+def upsert_contents_for_product_id(product_id, product_name, contents, review_ids, ratings, review_ending_sentence, num_reviews, category, ft_score = None, ft_senIdx = None):
 	if ft_score is None:
 		ft_score = {}
 	if ft_senIdx is None:
@@ -97,12 +97,15 @@ def upsert_contents_for_product_id(product_id, contents, review_ids, ratings, nu
 
 	query = {"product_id": product_id}
 	update_field = {
+	"product_name": product_name,
 	"contents": contents,
 	"review_ids": review_ids,
 	"ratings": ratings,
+	"review_ending_sentence": review_ending_sentence,
 	"num_reviews": num_reviews,
+	"category": category,
 	"ft_score": ft_score, 
-	"ft_senIdx":ft_senIdx
+	"ft_senIdx": ft_senIdx
 	}
 	product_collection.update(query, {"$set": update_field}, True)
 
@@ -119,7 +122,7 @@ def update_for_product_id(product_id, ft_score, ft_senIdx):
 
 	client.close()
 
-def update_contents_for_product_id(product_id, contents_new, review_ids_new, ratings_new, num_reviews, ft_score_new, ft_senIdx_new): 
+def update_contents_for_product_id(product_id, contents_new, review_ids_new, ratings_new, review_ending_sentence_new, num_reviews_new, category_new, ft_score_new, ft_senIdx_new): 
 	'''
 	Query the content from db, and appends/update 
 	'''
@@ -128,14 +131,45 @@ def update_contents_for_product_id(product_id, contents_new, review_ids_new, rat
 	review_ids = query_res[0]["review_ids"] + review_ids_new
 	ratings = query_res[0]["ratings"] + ratings_new
 
+	num_reviews = query_res[0]["num_reviews"]
+	category = query_res[0]["category"]
+	if num_reviews_new > num_reviews:
+		num_reviews = num_reviews_new
+	if category_new and not category:
+		category = category_new
+
+	#Calculating the review_ending_sentence:
+	review_ending_sentence = query_res[0]["review_ending_sentence"]
+	if len(review_ending_sentence) > 0:
+		last_sentence = review_ending_sentence[-1]
+	else: 
+		last_sentence = 0
+	review_ending_sentence_new = [last_sentence + item for item in review_ending_sentence_new]
+	review_ending_sentence = review_ending_sentence + review_ending_sentence_new
+
 	#merge two dictionary of lists
 	ft_score = query_res[0]["ft_score"]
 	ft_senIdx = query_res[0]["ft_senIdx"]
 	key_as_ft = set(ft_score).union(ft_score_new)
 	ft_score = dict((k, ft_score.get(k, []) + ft_score_new.get(k, [])) for k in key_as_ft)
 	ft_senIdx = dict((k, ft_senIdx.get(k, []) + ft_senIdx_new.get(k, [])) for k in key_as_ft)
+
+	client, db = connect_to_db()
+	product_collection = db.product_collection
+	query = {"product_id": product_id}
+	update_field = {
+		"contents": contents,
+		"review_ids": review_ids,
+		"ratings": ratings,
+		"review_ending_sentence": review_ending_sentence,
+		"num_reviews": num_reviews,
+		"category": category,
+		"ft_score": ft_score, 
+		"ft_senIdx": ft_senIdx
+	}
+	product_collection.update(query, {"$set": update_field}, True)
 	
-	upsert_contents_for_product_id(product_id, contents, review_ids, ratings, num_reviews, ft_score, ft_senIdx)
+	client.close()
 
 if __name__ == '__main__':
 	# function testing
