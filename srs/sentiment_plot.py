@@ -17,16 +17,19 @@ def prepareDataForRectPlot(feature_scorelist_dict, sort=True, spanTop=75, spanBo
 	
 	mids = []
 	spans = []
+	features_to_plot = []
 	for feature in features:
 		scorelist = feature_scorelist_dict[feature]
-		scorearray = np.array(scorelist)
-		mean = np.mean(scorearray)
-		span = np.percentile(scorearray, spanTop) - np.percentile(scorearray, spanBottom)
+		if len(scorelist) > 1:
+			scorearray = np.array(scorelist)
+			mean = np.mean(scorearray)
+			span = np.percentile(scorearray, spanTop) - np.percentile(scorearray, spanBottom)
 
-		mids.append(mean)
-		spans.append(span)
+			mids.append(mean)
+			spans.append(span)
+			features_to_plot.append(feature)
 
-	return mids, spans
+	return features_to_plot, mids, spans
 
 def prepareDataForHistPlotAndSampleSentences(
 	feature_scorelist_dict, feature_senIdxlist_dict, contents, sort=True, exampleSentences_size=3):
@@ -185,12 +188,17 @@ def getInitialHistPlotData(hist_cds):
 def sentimentBoxPlot(contents, feature_scorelist_dict, feature_senIdxlist_dict):
 
 	# get data for rectPlot
-	features = sorted(feature_scorelist_dict.keys())
-	mids, spans = prepareDataForRectPlot(feature_scorelist_dict, sort=True)
+	features, mids, spans = prepareDataForRectPlot(feature_scorelist_dict, sort=True)
+	feature_scorelist_dict_to_plot = {}
+	feature_senIdxlist_dict_to_plot = {}
+	for feature in features:
+		feature_scorelist_dict_to_plot[feature] = feature_scorelist_dict[feature]
+		feature_senIdxlist_dict_to_plot[feature] = feature_senIdxlist_dict[feature]
 
+	print feature_scorelist_dict_to_plot
 	# get data for histPlot and sample reviews
 	hist_cds, sampleSentences_cds = prepareDataForHistPlotAndSampleSentences(
-	feature_scorelist_dict, feature_senIdxlist_dict, contents, sort=True)
+	feature_scorelist_dict_to_plot, feature_senIdxlist_dict_to_plot, contents, sort=True)
 
 	# plot rectPlot
 	rectPlot, rectPlot_rect = getRectPlot(features, mids, spans)
@@ -232,20 +240,31 @@ def sentimentBoxPlot_Compare(contents1, feature_scorelist_dict1, feature_senIdxl
 	contents2, feature_scorelist_dict2, feature_senIdxlist_dict2):
 
 	# get data for rectPlot
-	features1 = sorted(feature_scorelist_dict1.keys())
-	mids1, spans1 = prepareDataForRectPlot(feature_scorelist_dict1, sort=True)
-	features2 = sorted(feature_scorelist_dict2.keys())
-	mids2, spans2 = prepareDataForRectPlot(feature_scorelist_dict2, sort=True)
+	features1, mids1, spans1 = prepareDataForRectPlot(feature_scorelist_dict1, sort=True)
+	features2, mids2, spans2 = prepareDataForRectPlot(feature_scorelist_dict2, sort=True)
+
+	feature_scorelist_dict_to_plot1 = {}
+	feature_senIdxlist_dict_to_plot1 = {}
+	feature_scorelist_dict_to_plot2 = {}
+	feature_senIdxlist_dict_to_plot2 = {}
+	common_features = []
+	for feature in features1:
+		if feature in features2:
+			feature_scorelist_dict_to_plot1[feature] = feature_scorelist_dict1[feature]
+			feature_senIdxlist_dict_to_plot1[feature] = feature_senIdxlist_dict1[feature]
+			feature_scorelist_dict_to_plot2[feature] = feature_scorelist_dict2[feature]
+			feature_senIdxlist_dict_to_plot2[feature] = feature_senIdxlist_dict2[feature]
+			common_features.append(feature)
 
 	# get data for histPlot and sample reviews
 	hist_cds1, sampleSentences_cds1 = prepareDataForHistPlotAndSampleSentences(
-	feature_scorelist_dict1, feature_senIdxlist_dict1, contents1, sort=True)
+	feature_scorelist_dict_to_plot1, feature_senIdxlist_dict_to_plot1, contents1, sort=True)
 	hist_cds2, sampleSentences_cds2 = prepareDataForHistPlotAndSampleSentences(
-	feature_scorelist_dict2, feature_senIdxlist_dict2, contents2, sort=True)
+	feature_scorelist_dict_to_plot2, feature_senIdxlist_dict_to_plot2, contents2, sort=True)
 
 	# plot rectPlot
-	rectPlot, rectPlot_rect1, rectPlot_rect2 = getRectPlot_compare(features1, mids1, spans1, 
-		features2, mids2, spans2)
+	rectPlot, rectPlot_rect1, rectPlot_rect2 = getRectPlot_compare(common_features, mids1, spans1, 
+		common_features, mids2, spans2)
 
 	# plot histPlot
 	histPlot_cds1 = getInitialHistPlotData(hist_cds1)
