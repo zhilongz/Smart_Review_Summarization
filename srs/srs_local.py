@@ -1,4 +1,4 @@
-from scraper import main as scraper_main, createAmazonScraper,scrape_number_review
+from scraper import main as scraper_main, createAmazonScraper, scrape_num_review_and_category
 from predictor import MaxEntropy_Predictor, Word2Vec_Predictor, loadTrainedPredictor
 from srs import settings
 from utilities import loadScraperDataFromDB, Sentence
@@ -11,77 +11,95 @@ def get_ft_dicts_from_contents(contents, predictor):
 	sentences = []
 	for cont in contents:
 		sentences.append(Sentence(content=cont))
-
 	
 	predictor.predict_for_sentences(sentences)	#if Maxentropy, the cp_threshold=0.5, if Word2Vec, the cp_threshold should be 0.85 for criteria_for_choosing_class = "max", similarity_measure = "max"
 	get_sentiment_score_for_sentences(sentences)
 	return get_ftScore_ftSenIdx_dicts(sentences)
 	
-def fill_in_db(product_id,predictor_name = 'MaxEntropy'):	
-	# fetch product info from db 
+
+def fill_in_db(product_id, predictor_name = 'MaxEntropy', review_ratio_threshold = 0.8, scrape_time_limit = 30):	
+	# fetch product info from db
 	prod_contents, prod_ft_score_dict, prod_ft_senIdx_dict = loadScraperDataFromDB(product_id)
 
 	if len(prod_contents) == 0: # not in db yet
-		# scrape contents
+		print "{0} not in db, now scraping...".format(product_id)
+		# scrape product info and review contents:
 		amazonScraper = createAmazonScraper()
-		prod_contents, prod_review_ids, prod_ratings, prod_num_reviews = scraper_main(amazonScraper, product_id)
-			
+		product_name, prod_contents, prod_review_ids, prod_ratings, review_ending_sentence = scraper_main(amazonScraper, product_id, True, scrape_time_limit)
+		prod_num_reviews, prod_category = scrape_num_review_and_category(product_id)
+
 		# classify, sentiment score
 		predictor = loadTrainedPredictor(predictor_name)
-		prod_ft_score_dict, prod_ft_senIdx_dict = \
-		get_ft_dicts_from_contents(prod_contents, predictor)
+		prod_ft_score_dict, prod_ft_senIdx_dict = get_ft_dicts_from_contents(prod_contents, predictor)
 		
 		# insert new entry
-		upsert_contents_for_product_id(product_id, prod_contents, \
-			prod_review_ids, prod_ratings, prod_num_reviews, \
-			prod_ft_score_dict, prod_ft_senIdx_dict)
-
-		return True
-	
-	elif len(prod_ft_score_dict) == 0 or len(prod_ft_senIdx_dict) == 0:
-		'''
-		this only triggered if product review is loaded from file and not scraped directly
-		'''
-		# classify, sentiment score
-		predictor = loadTrainedPredictor(predictor_name)
-		prod_ft_score_dict, prod_ft_senIdx_dict = \
-		get_ft_dicts_from_contents(prod_contents, predictor)
-		
-		# update old entry
-		update_for_product_id(product_id, prod_ft_score_dict, prod_ft_senIdx_dict)
-
-		return True
+		if len(prod_contents) > 0:
+			upsert_contents_for_product_id(product_id, product_name, prod_contents, \
+				prod_review_ids, prod_ratings, review_ending_sentence, prod_num_reviews, prod_category,\
+				prod_ft_score_dict, prod_ft_senIdx_dict)
+			return True
+		else:
+			print "Do not find reviews for %s" % product_id
+			return False
 
 	else:
-		print "Filled in db before for {0}".format(product_id)
-		# scrape for current number of review 
-		# num_review_current = scrape_number_review(product_id)
-		# query for number of reviews stored in db 
+
+		print "{0} already in db".format(product_id)
+		# scrape for total number of review and category
+		prod_num_reviews, prod_category = scrape_num_review_and_category(product_id)
 		query_res = select_for_product_id(product_id)
+		if not prod_num_reviews:
+			prod_num_reviews = query_res[0]['num_reviews']
 		num_review_db = len(query_res[0]["review_ids"])
 
-		# if num_review_current > num_review_db and num_review_db < 30: 
-		if num_review_db < 30: 
-			print "But not enough review in db, scrapping for more..."
+
+		if num_review_db < review_ratio_threshold * prod_num_reviews: 
+			print "But not enough reviews in db, scrapping for more..."
 			# scrape contents
 			amazonScraper = createAmazonScraper()
-			prod_contents, prod_review_ids, prod_ratings, prod_num_reviews = scraper_main(amazonScraper, product_id,True)
+			_, prod_contents_new, prod_review_ids, prod_ratings, review_ending_sentence = scraper_main(amazonScraper, product_id, True, scrape_time_limit)		
 
-			# classify, sentiment score
+			# classify, get sentiment score
 			predictor = loadTrainedPredictor(predictor_name)
-			prod_ft_score_dict, prod_ft_senIdx_dict = \
-			get_ft_dicts_from_contents(prod_contents, predictor)
-			
-			# append new entry to existing entry
-			update_contents_for_product_id(product_id, prod_contents, \
-				prod_review_ids, prod_ratings, prod_num_reviews, \
-				prod_ft_score_dict, prod_ft_senIdx_dict)
+			if len(prod_contents_new) > 0:
+				print "Filling scraped new reviews into db..."
+				if len(prod_ft_score_dict) == 0 or len(prod_ft_senIdx_dict) == 0:
+					prod_contents = prod_contents + prod_contents_new
+					prod_ft_score_dict, prod_ft_senIdx_dict = get_ft_dicts_from_contents(prod_contents, predictor)
+				else:
+					prod_ft_score_dict, prod_ft_senIdx_dict = get_ft_dicts_from_contents(prod_contents_new, predictor)
+				
+				# append new entry to existing entry
+				update_contents_for_product_id(product_id, prod_contents_new, prod_review_ids, \
+					prod_ratings, review_ending_sentence, prod_num_reviews, prod_category, \
+					prod_ft_score_dict, prod_ft_senIdx_dict)
+				return True
 
-			return True
-		else: 
-			# didn't do anything to db
-			print "There is enough review in db for analysis"
-			return False
+			else:
+				print "Do not find new reviews for %s" % product_id
+				if len(prod_ft_score_dict) == 0 or len(prod_ft_senIdx_dict) == 0:
+					prod_contents = prod_contents + prod_contents_new
+					prod_ft_score_dict, prod_ft_senIdx_dict = get_ft_dicts_from_contents(prod_contents, predictor)
+
+					update_for_product_id(product_id, prod_ft_score_dict, prod_ft_senIdx_dict)
+
+				return False
+
+		else:
+			print "enough reviews in db, getting scores..."
+			if len(prod_ft_score_dict) == 0 or len(prod_ft_senIdx_dict) == 0:
+				'''
+				This only triggered if product review is loaded from file and not scraped directly
+				'''
+				# classify, sentiment score
+				predictor = loadTrainedPredictor(predictor_name)
+				prod_ft_score_dict, prod_ft_senIdx_dict = \
+				get_ft_dicts_from_contents(prod_contents, predictor)
+				
+				# update old entry
+				update_for_product_id(product_id, prod_ft_score_dict, prod_ft_senIdx_dict)
+
+				return True
 	
 	
 def plot(product_id):
