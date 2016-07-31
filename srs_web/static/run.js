@@ -1,11 +1,13 @@
 function renderResult(d,tStatus, jqxhr){
-    $("#progress")[0].innerHTML = "Done! Please check your results below.";
+    $("#loader-wrapper").hide();
     product_id = d;
     var resultUrl = "/srs_result_box_bokeh/" + product_id;
+    window.location = resultUrl;
 
-    $("#resultLink")[0].href = resultUrl;
-    $("#resultLink")[0].innerHTML = product_id+" srs result";
-
+    // $("#progress")[0].innerHTML = "Done! Please check your results below.";
+    // $("#resultLink")[0].href = resultUrl;
+    // $("#resultLink")[0].innerHTML = product_id+" srs result";
+    // document.getElementById("loader").style.display = "block";
 }
 
 function linspace(a,b,n) {
@@ -47,7 +49,7 @@ function fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data
 
 
     if (typeof current_index != 'undefined'){
-        console.log(current_index);
+        // console.log(current_index);
 
         feature = features[current_index];
 
@@ -75,9 +77,8 @@ function fillHistData_compare(cb_data, histPlot_data1, hist_data1, histPlot_data
         histPlot_data2['right']= histRight2;
         histPlot_data2['feature'] = feature;
 
-        console.log(feature);
+        // console.log(feature);
         $("#histPlotTitle p").text(feature); 
-        
     }
 }
 function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
@@ -92,23 +93,41 @@ function fillSampleReviews(cb_data, sampleSentences_dict, feature) {
 
 $("#input_form").submit(function(e){    
     var formData = new FormData($(this)[0]);
+    var user_input1 = document.forms['input_form'].elements['product_id'].value;
+    if (user_input1 == ""){
+        $.ajax({
+            type: "POST",
+            url: "/",
+            complete: function(){
+                $("#input_alert").show();
+            }
+        })
+        e.preventDefault();
+
+    }else{
     // create job
-    $.ajax({
-        type: "POST",
-        url: "/scrape_reviews",
-        data: formData,
-        async: true,
-        success: function(data){
-            alert("Your summarization for " + data + " is ready!");
-            // run job
-            id = data;
-            renderResult(id);
-        },
-        cache: false,
-        contentType: false,
-        processData: false
-    })
-    e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/scrape_reviews",
+            data: formData,
+            async: true,
+            success: function(data){
+                // alert("Your summarization for " + data + " is ready!");
+                // run job
+                id = data;
+                renderResult(id);
+            },
+            beforeSend: function() {
+                // $("#loader1").show();
+                $("#input_alert").hide();
+                $("#loader-wrapper").show();
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        })
+        e.preventDefault();
+    }
 })
 
 $(document).ready(function(){

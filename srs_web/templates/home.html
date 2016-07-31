@@ -1,5 +1,6 @@
 <html>
 <head>
+        <link rel="icon" href="static/images/icon.png">
         <link rel="stylesheet"
               href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
               integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
@@ -9,10 +10,22 @@
         <script src="http://code.jquery.com/jquery-2.2.0.min.js" ></script>
         <link rel="stylesheet" href="static/default.css">
 </head>
+
 <body>
 
-<header><h1>Smart Review Summarization</h1></header>
+<ul class="topnav" id="myTopnav">
+  <li><a href="/"><img src="static/images/logo.png" height="25" width="73" /></a>
+  <li><a href="/" >Home</a></li>
+  <li><a href="#news">Team</a></li>
+  <li><a href="#contact">Contact</a></li>
+  <li><a href="#about">About</a></li>
+  <li class="icon">
+    <a href="javascript:void(0);" onclick="myFunction()">&#9776;</a>
+  </li>
+</ul>
 
+<h2><img src="static/images/logo_circle.png" height="100" width="100"></h2>
+<header><h1 style="color:#202020;">Smart Review Summarization</h1></header>
 
 <div id="main_section" style="width:600px; margin:0 auto;">
 	<form name="input_form"
@@ -23,7 +36,7 @@
 	      >
 
 	    <div class="form-group" id="input1">
-	        <label for="product_id">&nbsp Product ID:</label><br>
+	        <label for="product_id">&nbsp Product Asin <a target="_blank" href="https://www.amazon.com/gp/seller/asin-upc-isbn-info.html"> <sup>(?)</sup> </a></label><br>
 		    <center>
 		        <input name="product_id"
 		               id="product_id"
@@ -35,7 +48,7 @@
    			</center>
 	    </div> 
 	    <div class="form-group" id="input2" style="display:none;">
-	        <label for="product_id">&nbsp Product 2 ID:</label><br>
+	        <label for="product_id">&nbsp Product 2 Asin: </label><br>
 		    <center>
 		        <input name="product_id2"
 		               id="product_id2"
@@ -49,18 +62,37 @@
 
 	    <center>
 	    	<input type="submit" name="Summarize" id="Summarize"  value="Summarize" class="btn btn-default"/>
-		</center>
-	</form>
-	
+	    	<div id="input_alert" style="color:#FF0000; display:none" >Invalid Asin</div> 
 
-	<div id="progress"></div>
-    <div id="result"><a id="resultLink" href=""></a></div>
+		</center>
+
+	</form>
+
+	<div id="loader-wrapper" style="display:none;">
+		<div id="loader"></div>
+	</div>
+
+	<!-- <div id="progress"></div> -->
+    <!-- <div id="result"><a id="resultLink" href=""></a></div> -->
 
 </div>
 <script src="static/run.js"></script>
 
 <footer>
-<a href="mailto:srs2016@gmail.com">Contact us</a>
+<!-- <a href="mailto:srs2016@gmail.com">Contact us</a> -->
+
+<!-- https://simplesharingbuttons.com/ -->
+<ul class="share-buttons">
+  <li><a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fsrs.mit.edu&t=Smart%20Review%20Summarization" title="Share on Facebook" target="_blank"><img src="static/images/color/Facebook.png"></a></li>
+  <li><a href="https://twitter.com/intent/tweet?source=http%3A%2F%2Fsrs.mit.edu&text=Smart%20Review%20Summarization:%20http%3A%2F%2Fsrs.mit.edu" target="_blank" title="Tweet"><img src="static/images/color/Twitter.png"></a></li>
+  <li><a href="https://plus.google.com/share?url=http%3A%2F%2Fsrs.mit.edu" target="_blank" title="Share on Google+"><img src="static/images/color/Google+.png"></a></li>
+  <li><a href="http://pinterest.com/pin/create/button/?url=http%3A%2F%2Fsrs.mit.edu&description=" target="_blank" title="Pin it"><img src="static/images/color/Pinterest.png"></a></li>
+  <li><a href="http://www.reddit.com/submit?url=http%3A%2F%2Fsrs.mit.edu&title=Smart%20Review%20Summarization" target="_blank" title="Submit to Reddit"><img src="static/images/color/Reddit.png"></a></li>
+  <li><a href="http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Fsrs.mit.edu&title=Smart%20Review%20Summarization&summary=&source=http%3A%2F%2Fsrs.mit.edu" target="_blank" title="Share on LinkedIn"><img src="static/images/color/LinkedIn.png"></a></li>
+  <li><a href="mailto:srs2016@gmail.com" target="_blank" title="Email"><img src="static/images/color/Email.png"></a></li>
+</ul>
+
+
 </footer>
 </body>
 </html>
