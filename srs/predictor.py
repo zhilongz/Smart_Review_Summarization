@@ -167,7 +167,7 @@ class Word2Vec_svm_Predictor(Word2Vec_Predictor):
 	def predict(self, sentence):
 		
 		# transform sentence into a vec
-		similarity_vec = getCosineSimilarityFeatureVector(sentence, 
+		similarity_vec = getCosineSimilarityVector(sentence, 
 			self.aspectPatterns, self.model, self.static_seedwords_vec)
 
 		# use svm to map vec to a label
