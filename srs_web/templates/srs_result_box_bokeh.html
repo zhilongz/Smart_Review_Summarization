@@ -14,15 +14,30 @@
 	<body>
 	<script src="../static/run.js"></script>
 
-		<div id="myMenu">
-		  <div class="myWrapper">
-		    <nav>
-		    <a href="/"><img src="../static/logo.png" height="63" width="130" /></a>
-		    </nav>
-		  </div>
-		</div>
+	<ul class="topnav" id="myTopnav">
+	  <li><a href="/"><img src="../static/images/logo.png" height="25" width="73" /></a>
+	  <li><a href="/">Home</a></li>
+	  <li><a href="#news" >Team</a></li>
+	  <li><a href="#contact">Contact</a></li>
+	  <li><a href="#about">About</a></li>
+	  <li class="icon">
+	    <a href="javascript:void(0);" onclick="myFunction()">&#9776;</a>
+	  </li>
+	</ul>
 
 		<header id="pageHeader"><h1>Smart Review Summarization</h1></header>
+		<header id="pageHeader"><h2></h2></header>
+
+		<p id="prod1Legend" class="legend" align="right">
+			<div id="box" style="background-color:#4286F5;" >&nbsp;</div>
+			Product 1 Title 
+		</p>
+
+		<p id="prod2Legend" class="legend" align="right">
+			<div id="box" style="background-color:#DC4439;" >&nbsp;</div>
+			Product 2 Title 
+		</p>
+
 
 		<div id="AspectsPlot">{{ figDiv|safe }}</div>
 		
